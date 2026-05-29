@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { AuthProvider, useAuth, NAV_ACCESS } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import AppLayout from './components/layout/AppLayout';
 import LoginPage from './components/auth/LoginPage';
 import DashboardPage from './components/dashboard/DashboardPage';

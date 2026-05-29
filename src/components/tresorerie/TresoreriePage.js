@@ -29,7 +29,7 @@ export default function TresoreriePage() {
   const [mvts,       setMvts]       = useState([]);
   const [tabActif,   setTabActif]   = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
-  const [loading,    setLoading]    = useState(true);
+  const [, setLoading] = useState(true);
   const [modal,      setModal]      = useState(false);
   const [form,       setForm]       = useState({compte_id:'',type:'credit',montant:0,date:new Date().toISOString().slice(0,10),libelle:''});
   const fluxRef   = useRef(); const fluxInst   = useRef();
@@ -71,7 +71,7 @@ export default function TresoreriePage() {
   };
 
   useEffect(()=>{ charger(); },[]);
-  useEffect(()=>{ chargerMvts(); },[tabActif,typeFilter]);
+  useEffect(()=>{ chargerMvts(); },[tabActif,typeFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Graphique flux 6 mois
   useEffect(()=>{

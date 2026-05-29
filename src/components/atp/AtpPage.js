@@ -18,7 +18,7 @@ export default function AtpPage() {
   const [objQty,  setObjQty]  = useState({C24:0,C12:0,F605:0,F615:0,F61:0,HILIO:0});
   const [realQty, setRealQty] = useState({C24:0,C12:0,F605:0,F615:0,F61:0,HILIO:0});
   const [prevQty, setPrevQty] = useState({C24:0,C12:0,F605:0,F615:0,F61:0,HILIO:0});
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
 
   const charger = async () => {
     setLoading(true);
@@ -61,7 +61,7 @@ export default function AtpPage() {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { charger(); }, [mois]);
+  useEffect(() => { charger(); }, [mois]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Calculs CA
   const caObj  = PRODUITS.reduce((s,p) => s + objQty[p.key]  * p.prix, 0);
