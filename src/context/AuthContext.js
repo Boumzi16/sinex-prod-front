@@ -80,7 +80,7 @@ export function AuthProvider({ children }) {
   };
 
   const getRole   = () => user?._role || normalizeRole(user);
-  const can       = (p) => !!PERMISSIONS[getRole()]?.[p];
+  const can       = (p) => PERMISSIONS[getRole()]?.[p];
   const canAccess = (path) => (NAV_ACCESS[getRole()] || []).includes(path);
 
   return (
