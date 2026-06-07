@@ -4,11 +4,11 @@ import api from '../services/api';
 const AuthContext = createContext(null);
 
 export const PERMISSIONS = {
-  directeur_general:{ saisirProd:true, validerProd:true,  tresorerie:'write', stocks:'write', atp:true,  rapports:true,  kpis:true,  parametres:true,  import:true,  utilisateurs:true  },
-  operateur:        { saisirProd:true, validerProd:false, tresorerie:false,   stocks:'read',  atp:false, rapports:false, kpis:false, parametres:false, import:false, utilisateurs:false },
-  pdg:              { saisirProd:false,validerProd:false, tresorerie:'read',  stocks:'read',  atp:true,  rapports:true,  kpis:true,  parametres:false, import:false, utilisateurs:false },
-  pca:              { saisirProd:false,validerProd:false, tresorerie:'read',  stocks:'read',  atp:true,  rapports:true,  kpis:true,  parametres:false, import:false, utilisateurs:false },
-  conseil_admin:    { saisirProd:false,validerProd:false, tresorerie:false,   stocks:false,   atp:false, rapports:true,  kpis:true,  parametres:false, import:false, utilisateurs:false },
+  directeur_general:{ saisirProd:true, validerProd:true,  tresorerie:'write', stocks:'write', atp:true,  rapports:true,  kpis:true,  parametres:true,  import:true,  utilisateurs:true,  emailConfig:true  },
+  operateur:        { saisirProd:true, validerProd:false, tresorerie:false,   stocks:'read',  atp:false, rapports:false, kpis:false, parametres:false, import:false, utilisateurs:false, emailConfig:false },
+  pdg:              { saisirProd:false,validerProd:false, tresorerie:'read',  stocks:'read',  atp:true,  rapports:true,  kpis:true,  parametres:false, import:false, utilisateurs:false, emailConfig:false },
+  pca:              { saisirProd:false,validerProd:false, tresorerie:'read',  stocks:'read',  atp:true,  rapports:true,  kpis:true,  parametres:false, import:false, utilisateurs:false, emailConfig:false },
+  conseil_admin:    { saisirProd:false,validerProd:false, tresorerie:false,   stocks:false,   atp:true,  rapports:true,  kpis:true,  parametres:false, import:false, utilisateurs:false, emailConfig:false },
 };
 
 export const NAV_ACCESS = {
@@ -16,7 +16,7 @@ export const NAV_ACCESS = {
   operateur:        ['/production'],
   pdg:              ['/','/atp','/stocks','/tresorerie','/rapports'],
   pca:              ['/','/atp','/stocks','/tresorerie','/rapports'],
-  conseil_admin:    ['/','/rapports'],
+  conseil_admin:    ['/','/atp','/rapports'],
 };
 
 export const ROLE_LABELS = {
@@ -79,8 +79,8 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  const getRole  = () => user?._role || normalizeRole(user);
-  const can      = (p) => !!PERMISSIONS[getRole()]?.[p];
+  const getRole   = () => user?._role || normalizeRole(user);
+  const can       = (p) => !!PERMISSIONS[getRole()]?.[p];
   const canAccess = (path) => (NAV_ACCESS[getRole()] || []).includes(path);
 
   return (

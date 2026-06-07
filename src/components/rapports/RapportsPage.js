@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { rapportsAPI } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 
 const MOIS = ['Tous les mois','Janvier 2026','Février 2026','Mars 2026','Avril 2026','Mai 2026','Juin 2026'];
@@ -57,6 +58,7 @@ const JOURS_SEMAINE = [
 ];
 
 export default function RapportsPage() {
+  const { can } = useAuth();
   const [rapports,  setRapports]  = useState([]);
   const [loading,   setLoading]   = useState(true);
   const [moisF,     setMoisF]     = useState('Tous les mois');
@@ -170,7 +172,8 @@ export default function RapportsPage() {
         }}
           onMouseOver={e=>{e.currentTarget.style.transform='translateY(-2px)'}}
           onMouseOut={e=>{e.currentTarget.style.transform='none'}}
-          onClick={()=>setModalEmail(true)}>
+          onClick={()=>can('emailConfig')&&setModalEmail(true)}
+          style={{...{cursor:'pointer',transition:'border-color .2s,transform .15s'}, cursor: can('emailConfig')?'pointer':'default'}}>
           <div style={{fontSize:26,marginBottom:8}}>📧</div>
           <div style={{fontSize:11,fontWeight:600,marginBottom:4}}>Rapport email automatique</div>
           <div style={{fontSize:9,color:'var(--text3)',marginBottom:8,lineHeight:1.5}}>
@@ -184,9 +187,12 @@ export default function RapportsPage() {
             </div>
           )}
           <div style={{display:'flex',gap:6,justifyContent:'center'}}>
-            <button className={`btn ${config.actif?'success':'primary'}`} style={{fontSize:9,pointerEvents:'none'}}>
-              {config.actif ? '✓ Configuré' : '⚙ Configurer'}
-            </button>
+            {can('emailConfig')
+              ? <button className={`btn ${config.actif?'success':'primary'}`} style={{fontSize:9,pointerEvents:'none'}}>
+                  {config.actif ? '✓ Configuré' : '⚙ Configurer'}
+                </button>
+              : <span style={{fontSize:9,color:'var(--text3)'}}>Géré par le DG</span>
+            }
           </div>
         </div>
       </div>
