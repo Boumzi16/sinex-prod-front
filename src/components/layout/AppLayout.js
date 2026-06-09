@@ -50,7 +50,7 @@ export default function AppLayout() {
             <img src={LOGO_SINEX} alt="SINEX" style={{width:32,height:32,objectFit:'contain',borderRadius:'50%'}}/>
           </div>
           <div className="sb-brand-wrap">
-            <div className="sb-brand-name">SINEX-SA</div>
+            <div className="sb-brand-name">SINEX SA</div>
             <div className="sb-brand-sub">Tableau de bord production</div>
           </div>
         </div>
