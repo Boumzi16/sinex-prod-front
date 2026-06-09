@@ -191,3 +191,78 @@ html,body,#root{height:100%;font-family:'Sora',sans-serif;background:#070f1e;col
   .kpi-row{grid-template-columns:1fr}
   .role-badge{display:none}
 }
+
+/* ── MODE CLAIR ───────────────────────────────────────── */
+[data-theme="light"] {
+  --bg1:    #f1f5f9;
+  --bg2:    #ffffff;
+  --bg3:    #f8fafc;
+  --border: #e2e8f0;
+  --border2:#cbd5e1;
+  --text1:  #0f172a;
+  --text2:  #334155;
+  --text3:  #64748b;
+  --cyan:   #0891b2;
+  --green:  #059669;
+  --amber:  #d97706;
+  --red:    #dc2626;
+  --purple: #7c3aed;
+  --teal:   #0f766e;
+  --mono:   'Courier New', monospace;
+}
+
+[data-theme="light"] .card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+
+[data-theme="light"] .btn {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #334155;
+}
+
+[data-theme="light"] .btn.primary {
+  background: #0891b2;
+  color: white;
+  border-color: #0891b2;
+}
+
+[data-theme="light"] .btn.success {
+  background: #059669;
+  color: white;
+}
+
+[data-theme="light"] .tbl th {
+  background: #f8fafc;
+  color: #475569;
+}
+
+[data-theme="light"] .tbl tr:hover td {
+  background: #f1f5f9;
+}
+
+[data-theme="light"] .kpi {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+[data-theme="light"] .modal {
+  background: #ffffff;
+}
+
+[data-theme="light"] .modal-overlay {
+  background: rgba(0,0,0,.4);
+}
+
+[data-theme="light"] .form-inp,
+[data-theme="light"] .form-sel {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme="light"] .sidebar {
+  background: #1e293b;
+}

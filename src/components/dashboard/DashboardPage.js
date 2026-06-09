@@ -58,8 +58,25 @@ export default function DashboardPage() {
     (parseFloat(kpis.f615||0)*PRIX.F615) + (parseFloat(kpis.f605||0)*PRIX.F605) +
     (parseFloat(kpis.f61||0)*PRIX.F61) + (parseFloat(kpis.hilio||0)*PRIX.HILIO);
 
-  // CA annuel estimé (mois courant * 12 — sera remplacé par données réelles)
-  const caAnnuel = caMois * 12;
+  // CA cumulé annuel = somme de tous les mois de l'année en cours depuis janvier
+  const [caCumule, setCaCumule] = useState(0);
+  useEffect(()=>{
+    const annee = mois.slice(0,4);
+    const moisCourant = parseInt(mois.slice(5,7));
+    Promise.all(
+      Array.from({length:moisCourant},(_,i)=>{
+        const m = `${annee}-${String(i+1).padStart(2,'0')}`;
+        return dashboardAPI.consolide(m).then(r=>r.data?.kpis||{}).catch(()=>({}));
+      })
+    ).then(results=>{
+      const total = results.reduce((s,k)=>{
+        return s + (parseFloat(k.c12||0)*PRIX.C12) + (parseFloat(k.c24||0)*PRIX.C24) +
+          (parseFloat(k.f615||0)*PRIX.F615) + (parseFloat(k.f605||0)*PRIX.F605) +
+          (parseFloat(k.f61||0)*PRIX.F61) + (parseFloat(k.hilio||0)*PRIX.HILIO);
+      },0);
+      setCaCumule(total);
+    });
+  },[mois]); // eslint-disable-line
 
   useEffect(()=>{
     if(loading) return;
@@ -128,12 +145,12 @@ export default function DashboardPage() {
             {MOIS_LISTE.map(m=><option key={m.v} value={m.v}>{m.l}</option>)}
           </select>
         </div>
-        <div style={{display:'flex',alignItems:'center',gap:10,background:'rgba(34,211,238,.06)',border:'1px solid rgba(34,211,238,.2)',borderRadius:9,padding:'8px 16px'}}>
-          <span style={{fontSize:11,color:'var(--text3)'}}>CA mensuel :</span>
+        <div style={{display:'flex',alignItems:'center',gap:10,background:'rgba(34,211,238,.06)',border:'1px solid rgba(34,211,238,.2)',borderRadius:9,padding:'8px 16px',flexWrap:'wrap'}}>
+          <span style={{fontSize:11,color:'var(--text3)'}}>CA HT mois :</span>
           <span style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--cyan)',fontSize:14}}>{fmt(caMois)} FCFA</span>
           <span style={{color:'var(--border2)'}}>|</span>
-          <span style={{fontSize:11,color:'var(--text3)'}}>CA annuel estimé :</span>
-          <span style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--amber)',fontSize:14}}>{fmt(caAnnuel)} FCFA</span>
+          <span style={{fontSize:11,color:'var(--text3)'}}>CA HT cumulé {mois.slice(0,4)} :</span>
+          <span style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--amber)',fontSize:14}}>{fmt(caCumule)} FCFA</span>
         </div>
       </div>
 
