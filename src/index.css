@@ -271,20 +271,25 @@ html,body,#root{height:100%;font-family:'Sora',sans-serif;background:#070f1e;col
    MODE CLAIR — doux pour les yeux
    ══════════════════════════════════════════ */
 [data-theme="light"] {
-  --bg1:    #EFF3F8;
+  --bg1:    #E8EFF8;
   --bg2:    #FFFFFF;
-  --bg3:    #F4F7FB;
-  --border: #D8E2EF;
-  --border2:#B8C8DF;
-  --text1:  #1A2332;
-  --text2:  #2D3F55;
-  --text3:  #6B7E96;
-  --cyan:   #1B7FBF;
-  --green:  #1A7A50;
-  --amber:  #B86A00;
-  --red:    #C0392B;
-  --purple: #6C3DAB;
-  --teal:   #0E7068;
+  --bg3:    #F0F5FC;
+  --border: #C8D8EE;
+  --border2:#A8C0DC;
+  --text1:  #152032;
+  --text2:  #253648;
+  --text3:  #5A7290;
+  --cyan:   #0D72B0;
+  --green:  #0F6E42;
+  --amber:  #A85F00;
+  --red:    #B03025;
+  --purple: #5C2EA8;
+  --teal:   #0A6058;
+  /* Touches de couleur pour mixer */
+  --c-accent-glow: rgba(13,114,176,.08);
+  --card-blue:  #EAF3FB;
+  --card-green: #E6F5ED;
+  --card-amber: #FBF2E4;
 }
 [data-theme="light"] body { background:#EFF3F8; color:#1A2332; }
 [data-theme="light"] .card {
@@ -322,8 +327,24 @@ html,body,#root{height:100%;font-family:'Sora',sans-serif;background:#070f1e;col
 [data-theme="light"] .st.slow { background:#FEF0D4; color:#B86A00; }
 [data-theme="light"] .st.sconf{ background:#D4EAF9; color:#1B7FBF; }
 [data-theme="light"] .st.spend{ background:#FEF0D4; color:#B86A00; }
-[data-theme="light"] .sidebar { background:#1E2D42; }
-[data-theme="light"] .sidebar .nav-lbl { color:#CBD8E8; }
+[data-theme="light"] .sidebar {
+  background: linear-gradient(180deg, #1A2B42 0%, #1E3A5F 100%);
+  border-right-color: #2A4A70;
+}
+[data-theme="light"] .sb-brand-name { color:#E8F0FA; }
+[data-theme="light"] .sb-brand-sub  { color:#7DA4C8; }
+[data-theme="light"] .sb-section    { color:#5A85B0; }
+[data-theme="light"] .nav-item      { color:#A8C5E0; }
+[data-theme="light"] .nav-item:hover{ background:rgba(255,255,255,.08); color:#E8F0FA; }
+[data-theme="light"] .nav-item.active{background:rgba(34,180,255,.15); color:#5BC8FF; border-left-color:#5BC8FF; }
+[data-theme="light"] .user-name     { color:#E8F0FA; }
+[data-theme="light"] .user-role     { color:#7DA4C8; }
+[data-theme="light"] .user-avatar   { background:#2A4A70; color:#5BC8FF; }
+[data-theme="light"] .logout-btn    { color:#7DA4C8; }
+[data-theme="light"] .logout-btn:hover{ color:#E8F0FA; }
+[data-theme="light"] .topbar        { background:#FFFFFF; border-bottom-color:#D0DFF0; }
+[data-theme="light"] .topbar-title  { color:#1A2332; }
+[data-theme="light"] .topbar-date   { color:#6B7E96; }
 [data-theme="light"] .treso-tab { color:#2D3F55; }
 [data-theme="light"] .treso-tab.active { background:#1B7FBF; color:#fff; }
 [data-theme="light"] .fin-card { background:#F4F7FB; border-color:#D8E2EF; }
@@ -360,3 +381,66 @@ body { font-size:13px; line-height:1.6; }
 .fin-val { font-size:16px; font-weight:700; }
 .fin-lbl { font-size:9.5px; text-transform:uppercase; letter-spacing:.4px; }
 .tot-val { font-size:14px; font-weight:700; }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE — Smartphones modernes
+   (iPhone 14/15, Galaxy S23/S24, Pixel 7/8)
+   ══════════════════════════════════════════ */
+@media (max-width:480px) {
+  /* Layout */
+  .main-content { padding:10px !important; }
+  .topbar { padding:0 12px !important; }
+
+  /* Grilles → 1 colonne */
+  .kpi-grid-4, [style*="gridTemplateColumns:'repeat(4"], [style*="grid-template-columns:repeat(4"] {
+    grid-template-columns:1fr 1fr !important;
+  }
+  [style*="gridTemplateColumns:'repeat(3"], [style*="grid-template-columns:repeat(3"] {
+    grid-template-columns:1fr !important;
+  }
+  [style*="gridTemplateColumns:'1fr 1fr"] {
+    grid-template-columns:1fr !important;
+  }
+
+  /* Cards */
+  .card { border-radius:10px; padding:12px; }
+  .modal { width:95vw !important; margin:10px !important; padding:16px !important; }
+  .modal-overlay { align-items:flex-end; padding:0; }
+  .modal { border-radius:14px 14px 0 0 !important; max-height:92vh; overflow-y:auto; }
+
+  /* Tableaux scrollables */
+  .tbl-wrap, .card { overflow-x:auto; }
+  .tbl { min-width:600px; }
+  .tbl th, .tbl td { font-size:10px; padding:7px 8px; }
+
+  /* Textes */
+  .card-t { font-size:12px; }
+  .kpi-val { font-size:18px; }
+  .btn { font-size:10.5px; padding:7px 11px; }
+  .form-inp, .form-sel { font-size:14px; } /* 14px min pour iOS */
+
+  /* Sidebar overlay */
+  .sb-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:199; }
+
+  /* Cacher éléments moins importants */
+  .topbar-date { display:none !important; }
+  .cbadge.hide-mobile { display:none; }
+  .tot-row { flex-direction:column; gap:4px; }
+}
+
+@media (max-width:640px) {
+  /* Tablettes et grands smartphones landscape */
+  .form-row { flex-direction:column !important; }
+  [style*="gridTemplateColumns:'repeat(5"] {
+    grid-template-columns:1fr 1fr !important;
+  }
+  .fin-card { min-width:120px; }
+}
+
+@media (min-width:481px) and (max-width:768px) {
+  /* Tablettes portrait */
+  .main-content { padding:14px !important; }
+  [style*="gridTemplateColumns:'repeat(4"] {
+    grid-template-columns:1fr 1fr !important;
+  }
+}

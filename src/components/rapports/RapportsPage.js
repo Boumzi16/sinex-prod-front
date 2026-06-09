@@ -38,6 +38,46 @@ export default function RapportsPage() {
   const [generating, setGenerating] = useState({});
   const [config,     setConfig]     = useState(() => { try{return JSON.parse(localStorage.getItem('sinex_email_config'))||DEFAULT_CFG;}catch{return DEFAULT_CFG;} });
 
+  const [envoyant, setEnvoyant] = useState(false);
+
+  const chargerConfig = async () => {
+    try {
+      const r = await api.get('/email/config');
+      if (r.data && Object.keys(r.data).length > 0) {
+        setConfig(prev => ({...prev, ...r.data,
+          destinataires: Array.isArray(r.data.destinataires) ? r.data.destinataires : JSON.parse(r.data.destinataires||'["dg"]'),
+          actif: r.data.actif||false,
+        }));
+      }
+    } catch {}
+  };
+
+  const sauverConfigEmail = async () => {
+    try {
+      await api.post('/email/config', config);
+      toast.success('Configuration sauvegardée ✓');
+      setModalEmail(false);
+    } catch(e) { toast.error(e.response?.data?.message||'Erreur'); }
+  };
+
+  const testerSMTP = async () => {
+    try {
+      await api.post('/email/tester', config);
+      toast.success('Connexion SMTP OK ✓');
+    } catch(e) { toast.error(e.response?.data?.message||'Erreur SMTP'); }
+  };
+
+  const envoyerMaintenant = async (type) => {
+    setEnvoyant(true);
+    try {
+      const moisRap = moisF!=='all' ? moisF : new Date().toISOString().slice(0,7);
+      const r = await api.post('/email/envoyer', {type_rapport:type, mois:moisRap});
+      toast.success(r.data.message);
+      charger();
+    } catch(e) { toast.error(e.response?.data?.message||'Erreur envoi'); }
+    finally { setEnvoyant(false); }
+  };
+
   const charger = async () => {
     setLoading(true);
     try {
@@ -50,19 +90,32 @@ export default function RapportsPage() {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { charger(); }, [moisF]); // eslint-disable-line
+  useEffect(() => { charger(); chargerConfig(); }, [moisF]); // eslint-disable-line
 
-  // Télécharger un rapport généré
-  const telecharger = async (id, format, titre) => {
+  // Télécharger depuis historique = regénérer le même rapport
+  const telecharger = async (rapport, format) => {
+    const key = `dl_${rapport.id}_${format}`;
+    setGenerating(g=>({...g,[key]:true}));
     try {
-      const r = await rapportsAPI.telecharger(id, format);
-      const url = URL.createObjectURL(new Blob([r.data]));
+      const r = await api.post('/rapports/generer',
+        {type_rapport: rapport.type_rapport, format, mois: rapport.periode_debut},
+        {responseType:'blob', timeout:60000}
+      );
+      const ext = format==='PDF'?'pdf':'xlsx';
+      const mime = format==='PDF'?'application/pdf':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      const blob = new Blob([r.data], {type: mime});
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${titre}.${format==='PDF'?'pdf':'xlsx'}`;
+      a.download = `SINEX_${rapport.type_rapport}_${rapport.periode_debut}.${ext}`;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch { toast.error('Erreur téléchargement'); }
+      toast.success(`${format} téléchargé ✓`);
+    } catch(e) {
+      toast.error(e.response?.data?.message||'Erreur téléchargement');
+    } finally { setGenerating(g=>({...g,[key]:false})); }
   };
 
   // Générer un rapport
@@ -119,11 +172,7 @@ export default function RapportsPage() {
   const toggleType = (id) => setConfig(c=>({...c,types:c.types.includes(id)?c.types.filter(t=>t!==id):[...c.types,id]}));
   const toggleDest = (role) => setConfig(c=>({...c,destinataires:c.destinataires.includes(role)?c.destinataires.filter(d=>d!==role):[...c.destinataires,role]}));
 
-  const sauverConfig = () => {
-    localStorage.setItem('sinex_email_config', JSON.stringify(config));
-    toast.success('Configuration sauvegardée ✓');
-    setModalEmail(false);
-  };
+  // sauverConfig remplacé par sauverConfigEmail (API réelle)
 
   const nbDest = config.destinataires.length + (config.emails_supplementaires?config.emails_supplementaires.split(',').filter(e=>e.trim()).length:0);
   const prochainEnvoi = () => {
@@ -214,8 +263,16 @@ export default function RapportsPage() {
                 <td style={{color:'var(--text2)'}}>{r.genere_par_nom||'—'}</td>
                 <td style={{display:'flex',gap:4}}>
                   <button className="btn danger" style={{fontSize:9,padding:'3px 6px'}} onClick={()=>supprimerRapport(r.id)}>✕</button>
-                  <button className="btn primary" style={{fontSize:9,padding:'3px 8px'}} onClick={()=>telecharger(r.id,'PDF',r.type_rapport)}>↓ PDF</button>
-                  <button className="btn" style={{fontSize:9,padding:'3px 8px'}} onClick={()=>telecharger(r.id,'Excel',r.type_rapport)}>↓ Excel</button>
+                  <button className="btn primary" style={{fontSize:9,padding:'3px 8px'}}
+                    disabled={generating[`dl_${r.id}_PDF`]}
+                    onClick={()=>telecharger(r,'PDF')}>
+                    {generating[`dl_${r.id}_PDF`]?'⏳':'↓'} PDF
+                  </button>
+                  <button className="btn" style={{fontSize:9,padding:'3px 8px'}}
+                    disabled={generating[`dl_${r.id}_Excel`]}
+                    onClick={()=>telecharger(r,'Excel')}>
+                    {generating[`dl_${r.id}_Excel`]?'⏳':'↓'} Excel
+                  </button>
                 </td>
               </tr>
             ))}
@@ -244,6 +301,30 @@ export default function RapportsPage() {
               <label className="tgl"><input type="checkbox" checked={config.actif} onChange={e=>upd('actif',e.target.checked)}/><span className="tgl-sl"/></label>
             </div>
 
+            <div className="sec-title">Configuration SMTP</div>
+            <div className="form-row" style={{marginBottom:10}}>
+              <div className="form-grp">
+                <label className="form-lbl">Serveur SMTP</label>
+                <input type="text" className="form-inp" value={config.smtp_host||'smtp.gmail.com'} onChange={e=>upd('smtp_host',e.target.value)} placeholder="smtp.gmail.com"/>
+              </div>
+              <div className="form-grp" style={{maxWidth:90}}>
+                <label className="form-lbl">Port</label>
+                <input type="text" className="form-inp" value={config.smtp_port||'587'} onChange={e=>upd('smtp_port',e.target.value)}/>
+              </div>
+            </div>
+            <div className="form-row" style={{marginBottom:10}}>
+              <div className="form-grp">
+                <label className="form-lbl">Email expéditeur</label>
+                <input type="email" className="form-inp" value={config.smtp_user||''} onChange={e=>upd('smtp_user',e.target.value)} placeholder="ssinex.sa@gmail.com"/>
+              </div>
+              <div className="form-grp">
+                <label className="form-lbl">Mot de passe / App password</label>
+                <input type="password" className="form-inp" value={config.smtp_pass||''} onChange={e=>upd('smtp_pass',e.target.value)} placeholder="••••••••"/>
+              </div>
+            </div>
+            <div style={{marginBottom:12}}>
+              <button className="btn" style={{fontSize:10}} onClick={testerSMTP}>🔌 Tester la connexion SMTP</button>
+            </div>
             <div className="sec-title">Fréquence</div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginBottom:14}}>
               {[['quotidien','📅 Quotidien'],['hebdomadaire','📆 Hebdo'],['mensuel','🗓 Mensuel']].map(([v,l])=>(
@@ -308,9 +389,12 @@ export default function RapportsPage() {
               <textarea className="form-inp" value={config.message_email} onChange={e=>upd('message_email',e.target.value)} rows={4} style={{resize:'vertical'}}/>
             </div>
 
-            <div style={{display:'flex',justifyContent:'flex-end',gap:8}}>
+            <div style={{display:'flex',justifyContent:'space-between',gap:8,flexWrap:'wrap'}}>
+              <button className="btn success" style={{fontSize:10}} onClick={()=>envoyerMaintenant('production')}>
+                📧 Envoyer maintenant (Production)
+              </button>
               <button className="btn" onClick={()=>setModalEmail(false)}>Annuler</button>
-              <button className="btn primary" onClick={sauverConfig}>✓ Sauvegarder</button>
+              <button className="btn primary" onClick={sauverConfigEmail}>✓ Sauvegarder</button>
             </div>
           </div>
         </div>
