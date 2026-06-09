@@ -82,6 +82,15 @@ export default function ProductionPage() {
     setTheo(calcTheo(nf));
   };
 
+  const supprimer = async (id) => {
+    if (!window.confirm('Supprimer définitivement cette saisie ?')) return;
+    try {
+      await api.delete(`/production/${id}`);
+      toast.success('Saisie supprimée ✓');
+      charger();
+    } catch(e) { toast.error(e.response?.data?.message||'Erreur suppression'); }
+  };
+
   const ouvrirModification = (s) => {
     setEditId(s.id);
     setForm({
@@ -230,6 +239,9 @@ export default function ProductionPage() {
                   )}
                   {isDG && (
                     <button className="btn amber" style={{fontSize:9,padding:'3px 8px'}} onClick={()=>ouvrirModification(s)}>✎ Modifier</button>
+                  )}
+                  {can('supprimerProd') && (
+                    <button className="btn danger" style={{fontSize:9,padding:'3px 8px'}} onClick={()=>supprimer(s.id)}>✕ Supprimer</button>
                   )}
                 </td>
               </tr>

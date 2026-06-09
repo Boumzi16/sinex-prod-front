@@ -103,25 +103,7 @@ export default function AtpPage() {
 
   const totalCI  = data?.totalCI || 0;
 
-  // CPF = CA HT cumulé / (CD HT cumulé + CI HT cumulée)
-  // Calculé depuis le début de l'année
-  const [cpf, setCpf] = useState(0);
-  useEffect(()=>{
-    const annee = mois.slice(0,4);
-    const moisIdx = parseInt(mois.slice(5,7));
-    Promise.all(
-      Array.from({length:moisIdx},(_,i)=>{
-        const m = `${annee}-${String(i+1).padStart(2,'0')}`;
-        return api.get(`/atp/mois?mois=${m}`).then(r=>r.data).catch(()=>({}));
-      })
-    ).then(results=>{
-      const caCumul = results.reduce((s,d)=>s+parseFloat(d.CAHTR||0),0);
-      const cdCumul = results.reduce((s,d)=>s+parseFloat(d.CDHTR||0),0);
-      const ciCumul = results.reduce((s,d)=>s+parseFloat(d.totalCI||0),0);
-      const denom = cdCumul + ciCumul;
-      setCpf(denom > 0 ? caCumul / denom : 0);
-    });
-  },[mois]); // eslint-disable-line
+
   const tauxAv   = data?.taux_avancement || 0;
 
   // CA prévisions mois suivant (calculé localement)
@@ -174,12 +156,12 @@ export default function AtpPage() {
       {/* Trésorerie disponible */}
       <div className="card" style={{marginBottom:12,background:'linear-gradient(135deg,rgba(34,211,238,.08),rgba(52,211,153,.05))'}}>
         <div className="card-hd"><div className="card-t">💰 Trésorerie disponible — Projet de production</div><span className="cbadge bc">FCFA</span></div>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10}}>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10}}>
           <div className="fin-card"><div className="fin-lbl">Trésorerie totale</div><div className="fin-val">{fmt(treso)}</div><div className="fin-sub">FCFA</div></div>
           <div className="fin-card"><div className="fin-lbl">Valeur stocks</div><div className="fin-val">{fmt(stkVal)}</div><div className="fin-sub">FCFA</div></div>
           <div className="fin-card" style={{borderColor:'rgba(34,211,238,.3)'}}><div className="fin-lbl">Total disponible</div><div className="fin-val" style={{color:'var(--cyan)'}}>{fmt(treso+stkVal)}</div><div className="fin-sub">Tréso + Stocks</div></div>
           <div className="fin-card"><div className="fin-lbl">CAHTP</div><div className="fin-val" style={{color:'var(--amber)'}}>{CAHTP>0?fmt(CAHTP):'—'}</div><div className="fin-sub">Prévisionnel</div></div>
-          <div className="fin-card" style={{borderColor:'rgba(167,139,250,.3)'}}><div className="fin-lbl">CPF {mois.slice(0,4)}</div><div className="fin-val" style={{color:'var(--purple)',fontSize:15}}>{cpf>0?cpf.toFixed(2):'—'}</div><div className="fin-sub">CA/(CD+CI) cumulé</div></div>
+
         </div>
       </div>
 

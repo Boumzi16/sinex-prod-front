@@ -66,6 +66,24 @@ export default function RapportsPage() {
   };
 
   // Générer un rapport
+  const supprimerRapport = async (id) => {
+    if (!window.confirm('Supprimer ce rapport de l\'historique ?')) return;
+    try {
+      await api.delete(`/rapports/${id}`);
+      toast.success('Rapport supprimé ✓');
+      charger();
+    } catch { toast.error('Erreur suppression'); }
+  };
+
+  const viderHistorique = async () => {
+    if (!window.confirm('Effacer tout l\'historique des rapports ?')) return;
+    try {
+      await api.delete('/rapports/historique');
+      toast.success('Historique effacé ✓');
+      setRapports([]);
+    } catch { toast.error('Erreur'); }
+  };
+
   const generer = async (type, format) => {
     const key = `${type}_${format}`;
     setGenerating(g=>({...g,[key]:true}));
@@ -178,7 +196,13 @@ export default function RapportsPage() {
 
       {/* Historique */}
       <div className="card">
-        <div className="card-hd"><div className="card-t">Historique des rapports générés</div><span className="cbadge bc">{rapports.length}</span></div>
+        <div className="card-hd">
+          <div className="card-t">Historique des rapports générés</div>
+          <div style={{display:'flex',gap:8,alignItems:'center'}}>
+            <span className="cbadge bc">{rapports.length}</span>
+            {rapports.length>0&&<button className="btn danger" style={{fontSize:9,padding:'3px 10px'}} onClick={viderHistorique}>🗑 Tout effacer</button>}
+          </div>
+        </div>
         <table className="tbl">
           <thead><tr><th>Date</th><th>Type</th><th>Période</th><th>Généré par</th><th>Télécharger</th></tr></thead>
           <tbody>
@@ -189,6 +213,7 @@ export default function RapportsPage() {
                 <td style={{color:'var(--text3)'}}>{r.periode_debut||'—'}</td>
                 <td style={{color:'var(--text2)'}}>{r.genere_par_nom||'—'}</td>
                 <td style={{display:'flex',gap:4}}>
+                  <button className="btn danger" style={{fontSize:9,padding:'3px 6px'}} onClick={()=>supprimerRapport(r.id)}>✕</button>
                   <button className="btn primary" style={{fontSize:9,padding:'3px 8px'}} onClick={()=>telecharger(r.id,'PDF',r.type_rapport)}>↓ PDF</button>
                   <button className="btn" style={{fontSize:9,padding:'3px 8px'}} onClick={()=>telecharger(r.id,'Excel',r.type_rapport)}>↓ Excel</button>
                 </td>

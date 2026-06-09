@@ -4,16 +4,16 @@ import api from '../services/api';
 const AuthContext = createContext(null);
 
 export const PERMISSIONS = {
-  directeur_general:{ saisirProd:true, validerProd:true,  tresorerie:'write', stocks:'write', atp:true,  rapports:true,  kpis:true,  parametres:true,  import:true,  utilisateurs:true,  emailConfig:true  },
-  operateur:        { saisirProd:true, validerProd:false, tresorerie:false,   stocks:'read',  atp:false, rapports:false, kpis:false, parametres:false, import:false, utilisateurs:false, emailConfig:false },
-  pdg:              { saisirProd:false,validerProd:false, tresorerie:'read',  stocks:'read',  atp:true,  rapports:true,  kpis:true,  parametres:false, import:false, utilisateurs:false, emailConfig:false },
-  pca:              { saisirProd:false,validerProd:false, tresorerie:'read',  stocks:'read',  atp:true,  rapports:true,  kpis:true,  parametres:false, import:false, utilisateurs:false, emailConfig:false },
-  conseil_admin:    { saisirProd:false,validerProd:false, tresorerie:false,   stocks:false,   atp:true,  rapports:true,  kpis:true,  parametres:false, import:false, utilisateurs:false, emailConfig:false },
+  directeur_general:{ saisirProd:true, validerProd:true,  supprimerProd:true,  tresorerie:'write', stocks:'write', atp:true,  atpSaisie:true,  rapports:true,  kpis:true,  parametres:true,  import:true,  utilisateurs:true,  emailConfig:true  },
+  operateur:        { saisirProd:true, validerProd:false, supprimerProd:false, tresorerie:false,   stocks:'read',  atp:false, atpSaisie:false, rapports:false, kpis:true,  parametres:true,  import:false, utilisateurs:false, emailConfig:false },
+  pdg:              { saisirProd:false,validerProd:false, supprimerProd:false, tresorerie:'read',  stocks:'read',  atp:true,  atpSaisie:false, rapports:true,  kpis:true,  parametres:false, import:false, utilisateurs:false, emailConfig:false },
+  pca:              { saisirProd:false,validerProd:false, supprimerProd:false, tresorerie:'read',  stocks:'read',  atp:true,  atpSaisie:false, rapports:true,  kpis:true,  parametres:false, import:false, utilisateurs:false, emailConfig:false },
+  conseil_admin:    { saisirProd:false,validerProd:false, supprimerProd:false, tresorerie:false,   stocks:false,   atp:true,  atpSaisie:false, rapports:true,  kpis:true,  parametres:false, import:false, utilisateurs:false, emailConfig:false },
 };
 
 export const NAV_ACCESS = {
   directeur_general:['/','/production','/atp','/stocks','/tresorerie','/rapports','/import','/parametres','/utilisateurs'],
-  operateur:        ['/production'],
+  operateur:        ['/','/production','/parametres'],
   pdg:              ['/','/atp','/stocks','/tresorerie','/rapports'],
   pca:              ['/','/atp','/stocks','/tresorerie','/rapports'],
   conseil_admin:    ['/','/atp','/rapports'],

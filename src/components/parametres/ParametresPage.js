@@ -1,133 +1,108 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { ROLE_LABELS } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 
 export default function ParametresPage() {
   const { user } = useAuth();
   const [theme, setTheme] = useState(localStorage.getItem('sinex_theme')||'dark');
-  const [notifs, setNotifs] = useState({
-    email: localStorage.getItem('sinex_notif_email')!=='false',
-    stock: localStorage.getItem('sinex_notif_stock')!=='false',
-    atp:   localStorage.getItem('sinex_notif_atp')  !=='false',
-  });
-
-  const appliquerTheme = (t) => {
-    setTheme(t);
-    localStorage.setItem('sinex_theme', t);
-    document.documentElement.setAttribute('data-theme', t);
-    toast.success(t==='light'?'Mode clair activé ✓':'Mode sombre activé ✓');
-  };
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-  }, []); // eslint-disable-line
+  }, [theme]);
 
-  const sauverNotifs = () => {
-    Object.entries(notifs).forEach(([k,v]) => localStorage.setItem(`sinex_notif_${k}`, String(v)));
-    toast.success('Préférences sauvegardées ✓');
+  const basculerTheme = () => {
+    const n = theme==='dark'?'light':'dark';
+    setTheme(n);
+    localStorage.setItem('sinex_theme', n);
+    document.documentElement.setAttribute('data-theme', n);
+    toast.success(n==='light'?'Mode clair activé ✓':'Mode sombre activé ✓');
   };
+
+  const role = user?._role || user?.role || 'operateur';
+  const roleLabel = ROLE_LABELS[role] || role;
 
   return (
     <div className="fade-up">
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
 
         {/* Apparence */}
         <div className="card">
-          <div className="card-hd"><div className="card-t">🎨 Apparence</div></div>
+          <div className="card-hd"><div className="card-t">Apparence</div></div>
 
-          <div className="sec-title">Thème de l'interface</div>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:16}}>
-            <div onClick={()=>appliquerTheme('dark')}
-              style={{cursor:'pointer',padding:16,borderRadius:10,textAlign:'center',
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:18}}>
+            <div onClick={()=>theme!=='dark'&&basculerTheme()}
+              style={{padding:20,borderRadius:12,textAlign:'center',cursor:'pointer',
                 border:`2px solid ${theme==='dark'?'var(--cyan)':'var(--border)'}`,
-                background:theme==='dark'?'rgba(34,211,238,.06)':'var(--bg3)',
-                transition:'all .2s'}}>
-              <div style={{fontSize:28,marginBottom:6}}>🌙</div>
-              <div style={{fontSize:12,fontWeight:600,color:theme==='dark'?'var(--cyan)':'var(--text2)'}}>Mode sombre</div>
-              <div style={{fontSize:10,color:'var(--text3)',marginTop:4}}>Interface foncée</div>
-              {theme==='dark'&&<div style={{marginTop:8,fontSize:10,color:'var(--cyan)'}}>✓ Actif</div>}
+                background:theme==='dark'?'var(--bg3)':'var(--bg2)',transition:'all .2s'}}>
+              <div style={{fontSize:32,marginBottom:8}}>🌙</div>
+              <div style={{fontWeight:600,fontSize:12,color:theme==='dark'?'var(--cyan)':'var(--text2)'}}>Mode sombre</div>
+              <div style={{fontSize:10,color:'var(--text3)',marginTop:4}}>Fond foncé, texte clair</div>
+              {theme==='dark'&&<div style={{marginTop:10,fontSize:10,color:'var(--cyan)',fontWeight:600}}>● Actif</div>}
             </div>
-            <div onClick={()=>appliquerTheme('light')}
-              style={{cursor:'pointer',padding:16,borderRadius:10,textAlign:'center',
+            <div onClick={()=>theme!=='light'&&basculerTheme()}
+              style={{padding:20,borderRadius:12,textAlign:'center',cursor:'pointer',
                 border:`2px solid ${theme==='light'?'var(--cyan)':'var(--border)'}`,
-                background:theme==='light'?'rgba(34,211,238,.06)':'var(--bg3)',
-                transition:'all .2s'}}>
-              <div style={{fontSize:28,marginBottom:6}}>☀️</div>
-              <div style={{fontSize:12,fontWeight:600,color:theme==='light'?'var(--cyan)':'var(--text2)'}}>Mode clair</div>
-              <div style={{fontSize:10,color:'var(--text3)',marginTop:4}}>Interface claire</div>
-              {theme==='light'&&<div style={{marginTop:8,fontSize:10,color:'var(--cyan)'}}>✓ Actif</div>}
+                background:theme==='light'?'var(--bg3)':'var(--bg2)',transition:'all .2s'}}>
+              <div style={{fontSize:32,marginBottom:8}}>☀️</div>
+              <div style={{fontWeight:600,fontSize:12,color:theme==='light'?'var(--cyan)':'var(--text2)'}}>Mode clair</div>
+              <div style={{fontSize:10,color:'var(--text3)',marginTop:4}}>Fond blanc, texte foncé</div>
+              {theme==='light'&&<div style={{marginTop:10,fontSize:10,color:'var(--cyan)',fontWeight:600}}>● Actif</div>}
             </div>
           </div>
 
-          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 14px',background:'var(--bg3)',borderRadius:8}}>
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',
+            padding:'12px 16px',background:'var(--bg3)',borderRadius:10,
+            border:'1px solid var(--border)'}}>
             <div>
-              <div style={{fontSize:11,fontWeight:500}}>Basculer le thème</div>
-              <div style={{fontSize:10,color:'var(--text3)'}}>Actuel : {theme==='dark'?'Mode sombre':'Mode clair'}</div>
+              <div style={{fontSize:12,fontWeight:600}}>Thème actuel</div>
+              <div style={{fontSize:10,color:'var(--text3)',marginTop:2}}>
+                {theme==='dark'?'Interface sombre — confort nocturne':'Interface claire — confort diurne'}
+              </div>
             </div>
             <label className="tgl">
-              <input type="checkbox" checked={theme==='light'} onChange={e=>appliquerTheme(e.target.checked?'light':'dark')}/>
+              <input type="checkbox" checked={theme==='light'} onChange={basculerTheme}/>
               <span className="tgl-sl"/>
             </label>
           </div>
         </div>
 
-        {/* Notifications */}
+        {/* Mon compte */}
         <div className="card">
-          <div className="card-hd"><div className="card-t">🔔 Notifications</div></div>
-          <div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:16}}>
-            {[
-              ['email','Notifications par email','Recevoir les alertes par email'],
-              ['stock','Alertes de stocks','Être notifié en cas de rupture ou stock faible'],
-              ['atp','Alertes ATP','Être notifié si le taux d\'avancement est insuffisant'],
-            ].map(([k,titre,desc])=>(
-              <div key={k} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 14px',background:'var(--bg3)',borderRadius:8}}>
-                <div>
-                  <div style={{fontSize:11,fontWeight:500}}>{titre}</div>
-                  <div style={{fontSize:10,color:'var(--text3)'}}>{desc}</div>
-                </div>
-                <label className="tgl">
-                  <input type="checkbox" checked={notifs[k]} onChange={e=>setNotifs(n=>({...n,[k]:e.target.checked}))}/>
-                  <span className="tgl-sl"/>
-                </label>
-              </div>
-            ))}
-          </div>
-          <button className="btn primary" style={{width:'100%',justifyContent:'center'}} onClick={sauverNotifs}>
-            ✓ Sauvegarder les préférences
-          </button>
-        </div>
-
-        {/* Compte */}
-        <div className="card">
-          <div className="card-hd"><div className="card-t">👤 Mon compte</div></div>
+          <div className="card-hd"><div className="card-t">Mon compte</div></div>
           <div style={{display:'flex',flexDirection:'column',gap:10}}>
-            {[
-              ['Nom complet', user?.nom_complet||'—'],
-              ['Email', user?.email||'—'],
-              ['Rôle', user?.role||user?.nom_role||'—'],
-            ].map(([l,v])=>(
-              <div key={l} style={{padding:'10px 14px',background:'var(--bg3)',borderRadius:8}}>
-                <div style={{fontSize:10,color:'var(--text3)',marginBottom:2}}>{l}</div>
-                <div style={{fontSize:12,fontWeight:500,color:'var(--text1)'}}>{v}</div>
-              </div>
-            ))}
+            <div style={{padding:'14px 16px',background:'var(--bg3)',borderRadius:10,border:'1px solid var(--border)'}}>
+              <div style={{fontSize:10,color:'var(--text3)',marginBottom:4,textTransform:'uppercase',letterSpacing:.5}}>Nom complet</div>
+              <div style={{fontSize:13,fontWeight:600}}>{user?.nom_complet||'—'}</div>
+            </div>
+            <div style={{padding:'14px 16px',background:'var(--bg3)',borderRadius:10,border:'1px solid var(--border)'}}>
+              <div style={{fontSize:10,color:'var(--text3)',marginBottom:4,textTransform:'uppercase',letterSpacing:.5}}>Adresse e-mail</div>
+              <div style={{fontSize:13,fontFamily:'var(--mono)'}}>{user?.email||'—'}</div>
+            </div>
+            <div style={{padding:'14px 16px',background:'var(--bg3)',borderRadius:10,border:'1px solid var(--border)'}}>
+              <div style={{fontSize:10,color:'var(--text3)',marginBottom:4,textTransform:'uppercase',letterSpacing:.5}}>Rôle</div>
+              <div style={{fontSize:13,fontWeight:600,color:'var(--cyan)'}}>{roleLabel}</div>
+            </div>
           </div>
         </div>
 
-        {/* Infos système */}
-        <div className="card">
-          <div className="card-hd"><div className="card-t">ℹ️ Informations système</div></div>
-          <div style={{display:'flex',flexDirection:'column',gap:8}}>
+        {/* Informations système */}
+        <div className="card" style={{gridColumn:'1 / -1'}}>
+          <div className="card-hd"><div className="card-t">Informations système</div></div>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10}}>
             {[
-              ['Application','SINEX-SA Production Dashboard'],
+              ['Application','SINEX SA Dashboard'],
               ['Version','1.0.0'],
-              ['Société','SINEX-SA — Eau Minérale HILIO'],
-              ['Site','Défalé, Togo'],
+              ['Société','SINEX SA'],
+              ['Site de production','Défalé, Togo'],
+              ['Stack technique','React.js · Node.js · PostgreSQL'],
+              ['Hébergement','Vercel · Railway'],
               ['Développé par','CECO Group'],
+              ['Année','2026'],
             ].map(([l,v])=>(
-              <div key={l} style={{display:'flex',justifyContent:'space-between',padding:'8px 14px',background:'var(--bg3)',borderRadius:8}}>
-                <span style={{fontSize:10,color:'var(--text3)'}}>{l}</span>
-                <span style={{fontSize:11,fontWeight:500,color:'var(--text1)'}}>{v}</span>
+              <div key={l} style={{padding:'12px 14px',background:'var(--bg3)',borderRadius:10,border:'1px solid var(--border)'}}>
+                <div style={{fontSize:9,color:'var(--text3)',marginBottom:4,textTransform:'uppercase',letterSpacing:.5}}>{l}</div>
+                <div style={{fontSize:11,fontWeight:500}}>{v}</div>
               </div>
             ))}
           </div>

@@ -187,9 +187,14 @@ export default function StocksPage() {
               <input type="text" placeholder="Rechercher..." value={search} onChange={e=>setSearch(e.target.value)}
                 style={{background:'none',border:'none',outline:'none',color:'var(--text1)',fontFamily:'var(--font)',fontSize:11,width:160}}/>
             </div>
-            {isDGwrite && classe!=='3' && (
-              <button className="btn success" style={{marginLeft:'auto'}} onClick={()=>setModalEntree(true)}>+ Entrée de stock</button>
-            )}
+            <div style={{display:'flex',gap:8,marginLeft:'auto'}}>
+              {isDGwrite && classe!=='3' && (
+                <button className="btn success" onClick={()=>{setFormEntree(f=>({...f,type_mouvement:'entree'}));setModalEntree(true);}}>↑ Entrée de stock</button>
+              )}
+              {isDGwrite && (classe==='2'||classe==='3') && (
+                <button className="btn danger" onClick={()=>{setFormEntree(f=>({...f,type_mouvement:'sortie'}));setModalEntree(true);}}>↓ Sortie stock</button>
+              )}
+            </div>
             {classe==='3' && (
               <div style={{marginLeft:'auto',fontSize:11,color:'var(--cyan)',background:'rgba(34,211,238,.06)',border:'1px solid rgba(34,211,238,.15)',borderRadius:8,padding:'6px 12px'}}>
                 ℹ️ Alimenté automatiquement par la production validée
@@ -340,7 +345,7 @@ export default function StocksPage() {
       {modalEntree && (
         <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&setModalEntree(false)}>
           <div className="modal" style={{width:480}}>
-            <div className="modal-title">📦 Entrée de stock<button className="modal-close" onClick={()=>setModalEntree(false)}>✕</button></div>
+            <div className="modal-title">{formEntree.type_mouvement==='sortie'?'↓ Sortie de stock':'📦 Entrée de stock'}<button className="modal-close" onClick={()=>setModalEntree(false)}>✕</button></div>
             <div className="form-grp" style={{marginBottom:12}}>
               <label className="form-lbl">Article *</label>
               <select className="form-sel" style={{width:'100%'}} value={formEntree.article} onChange={e=>setFormEntree(f=>({...f,article:e.target.value}))}>
@@ -369,7 +374,7 @@ export default function StocksPage() {
             </div>
             <div style={{display:'flex',justifyContent:'flex-end',gap:8}}>
               <button className="btn" onClick={()=>setModalEntree(false)}>Annuler</button>
-              <button className="btn success" onClick={saveEntree}>✓ Enregistrer</button>
+              <button className={`btn ${formEntree.type_mouvement==='sortie'?'danger':'success'}`} onClick={saveEntree}>✓ Enregistrer</button>
             </div>
           </div>
         </div>

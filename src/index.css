@@ -266,3 +266,97 @@ html,body,#root{height:100%;font-family:'Sora',sans-serif;background:#070f1e;col
 [data-theme="light"] .sidebar {
   background: #1e293b;
 }
+
+/* ══════════════════════════════════════════
+   MODE CLAIR — doux pour les yeux
+   ══════════════════════════════════════════ */
+[data-theme="light"] {
+  --bg1:    #EFF3F8;
+  --bg2:    #FFFFFF;
+  --bg3:    #F4F7FB;
+  --border: #D8E2EF;
+  --border2:#B8C8DF;
+  --text1:  #1A2332;
+  --text2:  #2D3F55;
+  --text3:  #6B7E96;
+  --cyan:   #1B7FBF;
+  --green:  #1A7A50;
+  --amber:  #B86A00;
+  --red:    #C0392B;
+  --purple: #6C3DAB;
+  --teal:   #0E7068;
+}
+[data-theme="light"] body { background:#EFF3F8; color:#1A2332; }
+[data-theme="light"] .card {
+  background:#FFFFFF; border-color:#D8E2EF;
+  box-shadow:0 1px 4px rgba(0,0,0,.06);
+}
+[data-theme="light"] .kpi {
+  background:#FFFFFF; border-color:#D8E2EF;
+  box-shadow:0 1px 3px rgba(0,0,0,.05);
+}
+[data-theme="light"] .kpi-val { color:#1A2332; }
+[data-theme="light"] .kpi-lbl { color:#6B7E96; }
+[data-theme="light"] .tbl th { background:#F4F7FB; color:#2D3F55; }
+[data-theme="light"] .tbl td { color:#1A2332; border-color:#E8EFF8; }
+[data-theme="light"] .tbl tr:hover td { background:#EBF2FA; }
+[data-theme="light"] .btn { background:#F4F7FB; border-color:#C5D4E8; color:#2D3F55; }
+[data-theme="light"] .btn:hover { background:#E5EEF8; }
+[data-theme="light"] .btn.primary { background:#1B7FBF; color:#fff; border-color:#1B7FBF; }
+[data-theme="light"] .btn.success { background:#1A7A50; color:#fff; border-color:#1A7A50; }
+[data-theme="light"] .btn.danger  { background:#C0392B; color:#fff; border-color:#C0392B; }
+[data-theme="light"] .btn.amber   { background:#B86A00; color:#fff; border-color:#B86A00; }
+[data-theme="light"] .form-inp,
+[data-theme="light"] .form-sel {
+  background:#FFFFFF; border-color:#C5D4E8; color:#1A2332;
+}
+[data-theme="light"] .form-inp:focus,
+[data-theme="light"] .form-sel:focus { border-color:#1B7FBF; }
+[data-theme="light"] .modal { background:#FFFFFF; }
+[data-theme="light"] .modal-overlay { background:rgba(0,0,0,.35); }
+[data-theme="light"] .card-hd { border-bottom-color:#D8E2EF; }
+[data-theme="light"] .card-t { color:#1A2332; }
+[data-theme="light"] .cbadge { color:#2D3F55; background:#EBF2FA; border-color:#C5D4E8; }
+[data-theme="light"] .st.sok  { background:#D4EDDA; color:#1A7A50; }
+[data-theme="light"] .st.sout { background:#FAD7D4; color:#C0392B; }
+[data-theme="light"] .st.slow { background:#FEF0D4; color:#B86A00; }
+[data-theme="light"] .st.sconf{ background:#D4EAF9; color:#1B7FBF; }
+[data-theme="light"] .st.spend{ background:#FEF0D4; color:#B86A00; }
+[data-theme="light"] .sidebar { background:#1E2D42; }
+[data-theme="light"] .sidebar .nav-lbl { color:#CBD8E8; }
+[data-theme="light"] .treso-tab { color:#2D3F55; }
+[data-theme="light"] .treso-tab.active { background:#1B7FBF; color:#fff; }
+[data-theme="light"] .fin-card { background:#F4F7FB; border-color:#D8E2EF; }
+[data-theme="light"] .fin-lbl { color:#6B7E96; }
+[data-theme="light"] .fin-val { color:#1A2332; }
+[data-theme="light"] .tot-row { background:#EBF2FA; border-color:#C5D4E8; }
+[data-theme="light"] .tot-lbl { color:#6B7E96; }
+[data-theme="light"] .tot-val { color:#1A2332; }
+[data-theme="light"] .sec-title { color:#1B7FBF; }
+[data-theme="light"] .pbar { background:#D8E2EF; }
+[data-theme="light"] .kbar { background:#E8EFF8; }
+[data-theme="light"] .form-lbl { color:#2D3F55; }
+
+/* ══════════════════════════════════════════
+   MODERNISATION GLOBALE — lisibilité
+   ══════════════════════════════════════════ */
+body { font-size:13px; line-height:1.6; }
+.card { border-radius:12px; }
+.card-t { font-size:13px; font-weight:600; }
+.kpi { border-radius:12px; padding:14px 16px; }
+.kpi-val { font-size:22px; font-weight:700; line-height:1.2; }
+.kpi-lbl { font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+.kpi-sub { font-size:10px; margin-top:2px; }
+.btn { font-size:11px; padding:7px 14px; border-radius:8px; font-weight:500; letter-spacing:.2px; }
+.form-inp, .form-sel { font-size:12px; padding:9px 12px; border-radius:8px; }
+.form-lbl { font-size:11px; font-weight:500; margin-bottom:5px; }
+.tbl th { font-size:10.5px; padding:9px 10px; font-weight:600; text-transform:uppercase; letter-spacing:.4px; }
+.tbl td { font-size:11.5px; padding:8px 10px; }
+.modal { border-radius:14px; padding:24px; }
+.modal-title { font-size:14px; font-weight:700; margin-bottom:18px; }
+.cbadge { font-size:9.5px; font-weight:600; padding:3px 9px; border-radius:10px; }
+.sec-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; margin-bottom:10px; }
+.st { font-size:9.5px; font-weight:600; padding:3px 8px; border-radius:8px; }
+.fin-val { font-size:16px; font-weight:700; }
+.fin-lbl { font-size:9.5px; text-transform:uppercase; letter-spacing:.4px; }
+.tot-val { font-size:14px; font-weight:700; }
