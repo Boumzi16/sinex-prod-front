@@ -106,17 +106,25 @@ export default function DashboardPage() {
             y:{grid:{display:false},ticks:{color:'#94a3b8'}}}}
       });
 
-      const evoLabels=evo.length?evo.map(e=>e.mois||e.label):['Déc','Jan','Fév','Mar','Avr','Mai'];
+      // Évolution CA depuis janvier jusqu'au mois sélectionné
+      const annee = mois.slice(0,4);
+      const moisIdx = parseInt(mois.slice(5,7));
+      const moisLabels = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'].slice(0,moisIdx);
+      const caParMois = moisLabels.map((_,i)=>{
+        const m = `${annee}-${String(i+1).padStart(2,'0')}`;
+        const e = evo.find(x=>x.mois===m)||{c12:0,c24:0,hilio:0};
+        const ca = (e.c12||0)*2116.10 + (e.c24||0)*2033.90 + (e.hilio||0)*169.00;
+        return Math.round(ca/1000);
+      });
+
       if(refEvo.current) instEvo.current = new Chart(refEvo.current,{
-        type:'line',
-        data:{labels:evoLabels,datasets:[
-          {label:'C12',data:evo.length?evo.map(e=>e.c12||0):[0,0,0,0,0,0],borderColor:'rgba(34,211,238,.9)',backgroundColor:'rgba(34,211,238,.05)',fill:true,tension:.4,pointRadius:3,borderWidth:2},
-          {label:'C24',data:evo.length?evo.map(e=>e.c24||0):[0,0,0,0,0,0],borderColor:'rgba(52,211,153,.9)',backgroundColor:'rgba(52,211,153,.05)',fill:true,tension:.4,pointRadius:3,borderWidth:2},
-          {label:'HILIO',data:evo.length?evo.map(e=>e.hilio||0):[0,0,0,0,0,0],borderColor:'rgba(167,139,250,.9)',backgroundColor:'rgba(167,139,250,.05)',fill:true,tension:.4,pointRadius:3,borderWidth:2},
+        type:'bar',
+        data:{labels:moisLabels,datasets:[
+          {label:'CA HT (×1000 FCFA)',data:caParMois,backgroundColor:'rgba(34,211,238,.7)',borderRadius:4,borderColor:'rgba(34,211,238,.9)',borderWidth:1},
         ]},
         options:{responsive:true,maintainAspectRatio:false,
-          plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:8}}},
-          scales:{y:{grid:{color:'rgba(30,58,95,.5)'},ticks:{color:'#475569'}},x:{grid:{display:false},ticks:{color:'#475569'}}}}
+          plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:8}},tooltip:{callbacks:{label:(ctx)=>`${ctx.raw.toLocaleString('fr-FR')} k FCFA`}}},
+          scales:{y:{grid:{color:'rgba(30,58,95,.5)'},ticks:{color:'#475569',callback:v=>v+'k'}},x:{grid:{display:false},ticks:{color:'#475569'}}}}
       });
 
       const rebLabels=rebuts.length?rebuts.map(r=>r.nom||r.label):['Préformes','Bouchons','Étiquettes','Cartons','Film'];
