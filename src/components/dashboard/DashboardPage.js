@@ -64,7 +64,7 @@ export default function DashboardPage() {
       const cdC=results.reduce((s,d)=>s+parseFloat(d.CDHTR||0),0);
       const ciC=results.reduce((s,d)=>s+parseFloat(d.totalCI||0),0);
       const denom=cdC+ciC;
-      setCpf(denom>0?caC/denom:null);
+      setCpf(denom>0 ? caC/denom : caC>0 ? caC/Math.max(cdC,1) : 0);
     } catch { setCpf(null); }
     finally { setLoading(false); }
   };
@@ -172,11 +172,11 @@ export default function DashboardPage() {
           </select>
         </div>
         <div style={{display:'flex',alignItems:'center',gap:12,background:'rgba(34,211,238,.06)',border:'1px solid rgba(34,211,238,.2)',borderRadius:9,padding:'8px 16px',flexWrap:'wrap'}}>
-          {cpf!==null&&(
+          {(
             <>
               <div style={{display:'flex',flexDirection:'column',alignItems:'center'}}>
                 <span style={{fontSize:9,color:'var(--text3)',textTransform:'uppercase',letterSpacing:.5}}>CPF {mois.slice(0,4)}</span>
-                <span style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--purple)',fontSize:15}}>{cpf.toFixed(2)}</span>
+                <span style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--purple)',fontSize:15}}>{cpf!==null?cpf.toFixed(2):'—'}</span>
                 <span style={{fontSize:9,color:'var(--text3)'}}>Perf. financière</span>
               </div>
               <span style={{color:'var(--border2)',fontSize:18}}>|</span>
