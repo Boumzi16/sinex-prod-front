@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import api from '../../services/api';
 import { dashboardAPI, stocksAPI, tresorerieAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -20,6 +21,7 @@ export default function DashboardPage() {
   const [evo,    setEvo]    = useState([]);
   const [rebuts, setRebuts] = useState([]);
   const [loading,setLoading]= useState(true);
+  const [cpf, setCpf] = useState(null);
 
   const refFmt=useRef(); const refEvo=useRef(); const refReb=useRef();
   const instFmt=useRef(); const instEvo=useRef(); const instReb=useRef();
@@ -48,6 +50,22 @@ export default function DashboardPage() {
         setTreso(c);
       }
     } catch { toast.error('Erreur chargement'); }
+    // Calculer CPF annuel
+    try {
+      const annee = m.slice(0,4);
+      const moisIdx = parseInt(m.slice(5,7));
+      const results = await Promise.all(
+        Array.from({length:moisIdx},(_,i)=>{
+          const mo = annee+'-'+String(i+1).padStart(2,'0');
+          return api.get('/atp/mois?mois='+mo).then(r=>r.data).catch(()=>({}));
+        })
+      );
+      const caC=results.reduce((s,d)=>s+parseFloat(d.CAHTR||0),0);
+      const cdC=results.reduce((s,d)=>s+parseFloat(d.CDHTR||0),0);
+      const ciC=results.reduce((s,d)=>s+parseFloat(d.totalCI||0),0);
+      const denom=cdC+ciC;
+      setCpf(denom>0?caC/denom:null);
+    } catch { setCpf(null); }
     finally { setLoading(false); }
   };
 
@@ -154,6 +172,16 @@ export default function DashboardPage() {
           </select>
         </div>
         <div style={{display:'flex',alignItems:'center',gap:12,background:'rgba(34,211,238,.06)',border:'1px solid rgba(34,211,238,.2)',borderRadius:9,padding:'8px 16px',flexWrap:'wrap'}}>
+          {cpf!==null&&(
+            <>
+              <div style={{display:'flex',flexDirection:'column',alignItems:'center'}}>
+                <span style={{fontSize:9,color:'var(--text3)',textTransform:'uppercase',letterSpacing:.5}}>CPF {mois.slice(0,4)}</span>
+                <span style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--purple)',fontSize:15}}>{cpf.toFixed(2)}</span>
+                <span style={{fontSize:9,color:'var(--text3)'}}>Perf. financière</span>
+              </div>
+              <span style={{color:'var(--border2)',fontSize:18}}>|</span>
+            </>
+          )}
           <div style={{display:'flex',flexDirection:'column',alignItems:'center'}}>
             <span style={{fontSize:9,color:'var(--text3)',textTransform:'uppercase',letterSpacing:.5}}>CA HT mensuel</span>
             <span style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--cyan)',fontSize:15}}>{fmt(caMois)}</span>
