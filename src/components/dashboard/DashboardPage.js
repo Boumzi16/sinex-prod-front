@@ -52,8 +52,8 @@ export default function DashboardPage() {
     } catch { toast.error('Erreur chargement'); }
     // Calculer CPF annuel
     try {
-      const annee = m.slice(0,4);
-      const moisIdx = parseInt(m.slice(5,7));
+      const annee = mois.slice(0,4);
+      const moisIdx = parseInt(mois.slice(5,7));
       const results = await Promise.all(
         Array.from({length:moisIdx},(_,i)=>{
           const mo = annee+'-'+String(i+1).padStart(2,'0');
@@ -65,7 +65,7 @@ export default function DashboardPage() {
       const ciC=results.reduce((s,d)=>s+parseFloat(d.totalCI||0),0);
       const denom=cdC+ciC;
       setCpf(denom>0 ? caC/denom : caC>0 ? caC/Math.max(cdC,1) : 0);
-    } catch { setCpf(null); }
+    } catch(e) { console.error('CPF error:',e.message); setCpf(0); }
     finally { setLoading(false); }
   };
 
