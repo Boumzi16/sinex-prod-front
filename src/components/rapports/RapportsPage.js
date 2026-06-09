@@ -39,11 +39,6 @@ export default function RapportsPage() {
   const [config,     setConfig]     = useState(() => { try{return JSON.parse(localStorage.getItem('sinex_email_config'))||DEFAULT_CFG;}catch{return DEFAULT_CFG;} });
 
   const [envoyant, setEnvoyant] = useState(false);
-  const isOperateur = can('rapports') === 'partiel';
-  // Opérateur : pas de rapport trésorerie
-  const cartesVisibles = CARTES.filter(carte =>
-    isOperateur ? carte.id !== 'tresorerie' : true
-  );
 
   const chargerConfig = async () => {
     try {
@@ -60,7 +55,9 @@ export default function RapportsPage() {
   const sauverConfigEmail = async () => {
     try {
       await api.post('/email/config', config);
-      toast.success('Configuration sauvegardée ✓');
+      // Redémarrer les crons avec la nouvelle config
+      await api.post('/email/redemarrer').catch(()=>{});
+      toast.success('Configuration sauvegardée et crons mis à jour ✓');
       setModalEmail(false);
     } catch(e) { toast.error(e.response?.data?.message||'Erreur'); }
   };
@@ -198,7 +195,7 @@ export default function RapportsPage() {
 
       {/* Cartes rapports */}
       <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10,marginBottom:14}}>
-        {cartesVisibles.map(c=>(
+        {CARTES.map(c=>(
           <div key={c.id} className="card" style={{textAlign:'center',transition:'transform .15s'}}
             onMouseOver={e=>e.currentTarget.style.transform='translateY(-2px)'}
             onMouseOut={e=>e.currentTarget.style.transform='none'}>
