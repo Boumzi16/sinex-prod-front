@@ -76,3 +76,8 @@ export const utilisateursAPI = {
   supprimer: (id)      => api.delete(`/utilisateurs/${id}`),
   mdp:       (id,data) => api.put(`/utilisateurs/${id}/mdp`, data),
 };
+
+export const importAPI = {
+  historique: () => api.get('/import/historique'),
+  importer:   (type, data) => api.post(`/import/${type}`, data),
+};
