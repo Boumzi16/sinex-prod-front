@@ -66,22 +66,34 @@ export default function RapportsPage() {
   };
 
   // Générer un rapport
-  const generer = async (type, format, mois) => {
+  const generer = async (type, format) => {
     const key = `${type}_${format}`;
     setGenerating(g=>({...g,[key]:true}));
     try {
-      const r = await api.post('/rapports/generer', {type_rapport:type, format, mois:moisF!=='all'?moisF:new Date().toISOString().slice(0,7)}, {responseType:'blob'});
-      const url = URL.createObjectURL(new Blob([r.data]));
+      const moisRap = moisF!=='all' ? moisF : new Date().toISOString().slice(0,7);
+      const r = await api.post('/rapports/generer',
+        {type_rapport:type, format, mois:moisRap},
+        {responseType:'blob', timeout:60000}
+      );
+      const blob = new Blob([r.data], {
+        type: format==='PDF' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      const carte = CARTES.find(c=>c.id===type);
-      a.download = `SINEX_${type}_${mois||new Date().toISOString().slice(0,7)}.${format==='PDF'?'pdf':'xlsx'}`;
+      a.download = `SINEX_${type}_${moisRap}.${format==='PDF'?'pdf':'xlsx'}`;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      toast.success(`Rapport ${format} généré ✓`);
+      toast.success(`Rapport ${format} téléchargé ✓`);
       charger();
-    } catch {
-      toast.error('Génération rapport non disponible — backend requis');
+    } catch(err) {
+      if (err.response?.status === 404 || err.response?.status === 501) {
+        toast.error('Génération de rapports PDF/Excel en cours de développement');
+      } else {
+        toast.error('Erreur lors de la génération du rapport');
+      }
     } finally { setGenerating(g=>({...g,[key]:false})); }
   };
 

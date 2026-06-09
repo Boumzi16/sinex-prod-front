@@ -145,12 +145,18 @@ export default function DashboardPage() {
             {MOIS_LISTE.map(m=><option key={m.v} value={m.v}>{m.l}</option>)}
           </select>
         </div>
-        <div style={{display:'flex',alignItems:'center',gap:10,background:'rgba(34,211,238,.06)',border:'1px solid rgba(34,211,238,.2)',borderRadius:9,padding:'8px 16px',flexWrap:'wrap'}}>
-          <span style={{fontSize:11,color:'var(--text3)'}}>CA HT mois :</span>
-          <span style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--cyan)',fontSize:14}}>{fmt(caMois)} FCFA</span>
-          <span style={{color:'var(--border2)'}}>|</span>
-          <span style={{fontSize:11,color:'var(--text3)'}}>CA HT cumulé {mois.slice(0,4)} :</span>
-          <span style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--amber)',fontSize:14}}>{fmt(caCumule)} FCFA</span>
+        <div style={{display:'flex',alignItems:'center',gap:12,background:'rgba(34,211,238,.06)',border:'1px solid rgba(34,211,238,.2)',borderRadius:9,padding:'8px 16px',flexWrap:'wrap'}}>
+          <div style={{display:'flex',flexDirection:'column',alignItems:'center'}}>
+            <span style={{fontSize:9,color:'var(--text3)',textTransform:'uppercase',letterSpacing:.5}}>CA HT mensuel</span>
+            <span style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--cyan)',fontSize:15}}>{fmt(caMois)}</span>
+            <span style={{fontSize:9,color:'var(--text3)'}}>FCFA</span>
+          </div>
+          <span style={{color:'var(--border2)',fontSize:18}}>|</span>
+          <div style={{display:'flex',flexDirection:'column',alignItems:'center'}}>
+            <span style={{fontSize:9,color:'var(--text3)',textTransform:'uppercase',letterSpacing:.5}}>CA HT cumulé {mois.slice(0,4)}</span>
+            <span style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--amber)',fontSize:15}}>{fmt(caCumule)}</span>
+            <span style={{fontSize:9,color:'var(--text3)'}}>FCFA</span>
+          </div>
         </div>
       </div>
 
@@ -180,7 +186,7 @@ export default function DashboardPage() {
           <div style={{position:'relative',height:190}}><canvas ref={refFmt}/></div>
         </div>
         <div className="card">
-          <div className="card-hd"><div className="card-t">Évolution 6 mois</div><span className="cbadge bg">Tendance</span></div>
+          <div className="card-hd"><div className="card-t">Évolution</div><span className="cbadge bg">Tendance</span></div>
           <div style={{position:'relative',height:190}}><canvas ref={refEvo}/></div>
         </div>
       </div>

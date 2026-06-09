@@ -35,6 +35,8 @@ export default function StocksPage() {
   const [formEntree,  setFormEntree]  = useState({article:'',qte:0,date:new Date().toISOString().slice(0,10),motif:''});
   const [formPrix,    setFormPrix]    = useState({id:'',libelle:'',prix:0});
   const [formMvt,     setFormMvt]     = useState({quantite:0,date:'',motif:'',type_mouvement:'entree'});
+  const [modalEditArt,setModalEditArt] = useState(null);
+  const [formArt,     setFormArt]      = useState({libelle:'',unite:'',seuil_alerte:0});
 
   const chargerSoldes = async () => {
     setLoading(true);
@@ -120,6 +122,22 @@ export default function StocksPage() {
       await api.delete(`/stocks/mouvements/${id}`);
       toast.success('Mouvement supprimé ✓');
       chargerMvts();
+    } catch(e) { toast.error(e.response?.data?.message||'Erreur'); }
+  };
+
+  const saveEditArt = async () => {
+    try {
+      await api.put(`/stocks/articles/${modalEditArt.id}`, formArt);
+      toast.success('Article modifié ✓');
+      setModalEditArt(null); chargerSoldes();
+    } catch(e) { toast.error(e.response?.data?.message||'Erreur'); }
+  };
+
+  const deleteArt = async (id, libelle) => {
+    if (!window.confirm(`Supprimer l'article "${libelle}" ?`)) return;
+    try {
+      await api.delete(`/stocks/articles/${id}`);
+      toast.success('Article supprimé ✓'); chargerSoldes();
     } catch(e) { toast.error(e.response?.data?.message||'Erreur'); }
   };
 
@@ -219,10 +237,18 @@ export default function StocksPage() {
                       </td>
                       <td>{st==='out'?<span className="st sout">Rupture</span>:st==='low'?<span className="st slow">Faible</span>:<span className="st sok">OK</span>}</td>
                       {isDGwrite && (
-                        <td>
-                          <button className="btn amber" style={{fontSize:9,padding:'3px 8px'}}
+                        <td style={{display:'flex',gap:4,flexWrap:'nowrap'}}>
+                          <button className="btn amber" style={{fontSize:9,padding:'3px 6px'}}
                             onClick={()=>{setFormPrix({id:s.id,libelle:s.libelle,prix:s.prix_unitaire_ht||0});setModalPrix(true);}}>
                             ✎ Prix
+                          </button>
+                          <button className="btn" style={{fontSize:9,padding:'3px 6px'}}
+                            onClick={()=>{setModalEditArt(s);setFormArt({libelle:s.libelle,unite:s.unite,seuil_alerte:s.seuil_alerte||0});}}>
+                            ✎ Art.
+                          </button>
+                          <button className="btn danger" style={{fontSize:9,padding:'3px 6px'}}
+                            onClick={()=>deleteArt(s.id,s.libelle)}>
+                            ✕
                           </button>
                         </td>
                       )}
@@ -365,6 +391,33 @@ export default function StocksPage() {
             <div style={{display:'flex',justifyContent:'flex-end',gap:8}}>
               <button className="btn" onClick={()=>setModalPrix(false)}>Annuler</button>
               <button className="btn primary" onClick={savePrix}>✓ Mettre à jour</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Modifier Article */}
+      {modalEditArt && (
+        <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&setModalEditArt(null)}>
+          <div className="modal" style={{width:440}}>
+            <div className="modal-title">✎ Modifier l'article<button className="modal-close" onClick={()=>setModalEditArt(null)}>✕</button></div>
+            <div className="form-grp" style={{marginBottom:10}}>
+              <label className="form-lbl">Désignation</label>
+              <input type="text" className="form-inp" value={formArt.libelle} onChange={e=>setFormArt(f=>({...f,libelle:e.target.value}))}/>
+            </div>
+            <div className="form-row">
+              <div className="form-grp">
+                <label className="form-lbl">Unité</label>
+                <input type="text" className="form-inp" value={formArt.unite} onChange={e=>setFormArt(f=>({...f,unite:e.target.value}))}/>
+              </div>
+              <div className="form-grp">
+                <label className="form-lbl">Seuil d'alerte</label>
+                <input type="number" className="form-inp" min={0} value={formArt.seuil_alerte} onChange={e=>setFormArt(f=>({...f,seuil_alerte:+e.target.value}))}/>
+              </div>
+            </div>
+            <div style={{display:'flex',justifyContent:'flex-end',gap:8,marginTop:16}}>
+              <button className="btn" onClick={()=>setModalEditArt(null)}>Annuler</button>
+              <button className="btn primary" onClick={saveEditArt}>✓ Enregistrer</button>
             </div>
           </div>
         </div>
