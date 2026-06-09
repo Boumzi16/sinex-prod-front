@@ -21,9 +21,6 @@ export default function DashboardPage() {
   const [evo,    setEvo]    = useState([]);
   const [rebuts, setRebuts] = useState([]);
   const [loading,setLoading]= useState(true);
-  const [analyseIA,  setAnalyseIA]  = useState('');
-  const [loadingIA,  setLoadingIA]  = useState(false);
-  const [showIA,     setShowIA]     = useState(false);
   const [cpf, setCpf] = useState(null);
 
   const refFmt=useRef(); const refEvo=useRef(); const refReb=useRef();
@@ -74,24 +71,7 @@ export default function DashboardPage() {
 
   useEffect(()=>{ charger(); },[mois]); // eslint-disable-line
 
-  const lancerAnalyseIA = async () => {
-    setLoadingIA(true);
-    setShowIA(true);
-    setAnalyseIA('');
-    try {
-      const atpData = await api.get('/atp/mois?mois='+mois).then(r=>r.data).catch(()=>({}));
-      const alertes = await api.get('/stocks/alertes').then(r=>r.data?.length||0).catch(()=>0);
-      const r = await api.post('/ia/dashboard', {
-        kpis, caMois, caCumule, cpf, mois,
-        atp: atpData,
-        stocks_alertes: typeof alertes==='number'?alertes:alertes?.length||0,
-      });
-      setAnalyseIA(r.data.analyse);
-    } catch(e) {
-      setAnalyseIA('Erreur : '+(e.response?.data?.message||e.message||'Clé API Anthropic non configurée dans Railway'));
-    }
-    setLoadingIA(false);
-  };
+
 
   // CA du mois calculé à partir des KPIs
   const caMois = (parseFloat(kpis.c12||0)*PRIX.C12) + (parseFloat(kpis.c24||0)*PRIX.C24) +
@@ -302,49 +282,6 @@ export default function DashboardPage() {
           {!rebuts.length&&!loading&&<div style={{textAlign:'center',color:'var(--text3)',fontSize:11,marginTop:8}}>Aucun rebut enregistré</div>}
         </div>
       </div>
-      {/* Bouton IA */}
-      <div style={{display:'flex',justifyContent:'flex-end',marginTop:8}}>
-        <button className="btn primary"
-          style={{display:'flex',alignItems:'center',gap:8,padding:'10px 18px',fontSize:12,fontWeight:600}}
-          onClick={lancerAnalyseIA} disabled={loadingIA}>
-          <span style={{fontSize:16}}>🤖</span>
-          {loadingIA ? 'Analyse en cours...' : 'Analyser avec l'IA'}
-        </button>
-      </div>
-
-      {/* Bloc analyse IA */}
-      {showIA && (
-        <div className="card fade-up" style={{marginTop:12,border:'1px solid rgba(139,92,246,.25)',background:'rgba(139,92,246,.04)'}}>
-          <div className="card-hd">
-            <div className="card-t" style={{color:'var(--purple)'}}>🤖 Analyse IA — {mois}</div>
-            <div style={{display:'flex',gap:8}}>
-              <span className="cbadge" style={{background:'rgba(139,92,246,.15)',color:'var(--purple)'}}>Claude AI</span>
-              <button className="btn" style={{fontSize:9,padding:'2px 8px'}} onClick={()=>setShowIA(false)}>✕</button>
-            </div>
-          </div>
-          {loadingIA ? (
-            <div style={{padding:'20px',textAlign:'center',color:'var(--text3)'}}>
-              <div style={{fontSize:24,marginBottom:8}}>⏳</div>
-              <div style={{fontSize:11}}>Claude analyse vos données...</div>
-            </div>
-          ) : (
-            <div style={{padding:'4px 0',lineHeight:1.7}}>
-              {analyseIA.split('
-').map((line,i)=>(
-                <p key={i} style={{
-                  margin:'4px 0',
-                  fontSize: line.startsWith('**')||line.startsWith('#') ? 12 : 11,
-                  fontWeight: line.startsWith('**')||line.startsWith('#') ? 600 : 400,
-                  color: line.startsWith('**') ? 'var(--text1)' : 'var(--text2)',
-                  paddingLeft: line.startsWith('-')||line.startsWith('•') ? 12 : 0,
-                }}>
-                  {line.replace(/\*\*/g,'').replace(/^#+\s/,'')}
-                </p>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
