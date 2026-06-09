@@ -1,84 +1,72 @@
-import { useState, useRef } from 'react';
-import { importAPI } from '../../services/api';
+import { useState, useEffect } from 'react';
+import api from '../../services/api';
+import ImportDrop from './ImportDrop';
 import toast from 'react-hot-toast';
 
-const DROPS = [
-  {id:'production',icon:'🏭',titre:'Import Production',desc:'Fichier mensuel de production journalière\nPDT_MOIS_ANNEE_SINEX_SA.xlsx',badge:'bc',badgeTxt:'C12 · C24 · F06 · HILIO · Rebuts',btnCls:'primary'},
-  {id:'tresorerie',icon:'💰',titre:'Import Trésorerie',desc:'Compte de trésorerie du fichier ATP\nFeuille "Compte de trésorerie"',badge:'bg',badgeTxt:'Caisse · BOA · BSIC · BATG',btnCls:'success'},
-  {id:'stocks',    icon:'📦',titre:'Import Stocks',    desc:'Compte des stocks du fichier ATP\nFeuille "Compte des stocks"',badge:'ba',badgeTxt:'Préformes · Bouchons · Étiquettes',btnCls:'amber'},
-];
+const fmtDate = (d) => { try{return new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch{return'—';} };
 
-function DropCard({config,onDone}){
-  const [loading,setLoading]=useState(false);
-  const [statut,setStatut]=useState(null);
-  const inputRef=useRef();
+export default function ImportPage() {
+  const [historique, setHistorique] = useState([]);
+  const [loading,    setLoading]    = useState(true);
 
-  const handleFile=async(file)=>{
-    if(!file)return;
-    if(!file.name.match(/\.(xlsx|xls)$/i)){toast.error('Seuls les fichiers Excel sont acceptés');return;}
-    setLoading(true);setStatut(null);
-    const fd=new FormData();fd.append('fichier',file);fd.append('type',config.id);
-    try{
-      const r=await importAPI.excel(fd);const d=r.data;
-      setStatut({ok:true,lignes:d.importes||0});
-      toast.success(`✓ Import ${config.titre} — ${d.importes||0} lignes importées`);
-      onDone?.({type:config.id,fichier:file.name,lignes:d.importes||0});
-    }catch(e){
-      const msg=e.response?.data?.message||'Erreur import';
-      setStatut({ok:false,msg});toast.error(msg);
-    }finally{setLoading(false);}
+  const charger = async () => {
+    setLoading(true);
+    try {
+      const r = await api.get('/import/historique');
+      const d = r.data;
+      setHistorique(Array.isArray(d)?d:Array.isArray(d?.data)?d.data:[]);
+    } catch {
+      setHistorique([]); // Pas d'erreur affichée — historique vide si pas de données
+    } finally { setLoading(false); }
   };
 
-  return(
-    <div className="import-card"
-      onClick={()=>!loading&&inputRef.current?.click()}
-      onDragOver={e=>{e.preventDefault();e.currentTarget.style.borderColor='var(--cyan)';}}
-      onDragLeave={e=>{e.currentTarget.style.borderColor='';}}
-      onDrop={e=>{e.preventDefault();e.currentTarget.style.borderColor='';handleFile(e.dataTransfer.files[0]);}}>
-      <input ref={inputRef} type="file" accept=".xlsx,.xls" style={{display:'none'}} onChange={e=>handleFile(e.target.files[0])}/>
-      <div className="import-ico">{config.icon}</div>
-      <div className="import-title">{config.titre}</div>
-      <div className="import-desc">{config.desc.split('\n').map((l,i)=><span key={i}>{l}{i===0&&<br/>}</span>)}</div>
-      <div style={{marginBottom:8}}><span className={`cbadge ${config.badge}`}>{config.badgeTxt}</span></div>
-      {loading
-        ? <div style={{display:'flex',alignItems:'center',gap:8,justifyContent:'center',color:'var(--cyan)',fontSize:11}}><div className="spinner" style={{width:16,height:16}}/>Import en cours...</div>
-        : statut
-          ? <div style={{fontSize:11,fontWeight:600,color:statut.ok?'var(--green)':'var(--red)'}}>{statut.ok?`✓ ${statut.lignes} lignes importées`:`✗ ${statut.msg}`}</div>
-          : <button className={`btn ${config.btnCls}`} style={{margin:'0 auto',pointerEvents:'none'}}>↑ Sélectionner fichier Excel</button>
-      }
-    </div>
-  );
-}
+  useEffect(() => { charger(); }, []);
 
-export default function ImportPage(){
-  const [historique,setHistorique]=useState([
-    {date:'16/05/2026',type:'Production',fichier:'PDT_AOUT_25_SINEX.xlsx',lignes:26},
-    {date:'16/05/2026',type:'Stocks',fichier:'ATP_01_-26.xlsx',lignes:12},
-  ]);
-
-  const onDone=(d)=>{
-    setHistorique(h=>[{date:new Date().toLocaleDateString('fr-FR'),type:DROPS.find(x=>x.id===d.type)?.titre||d.type,fichier:d.fichier,lignes:d.lignes},...h]);
-  };
-
-  return(
+  return (
     <div className="fade-up">
-      <div className="import-grid">
-        {DROPS.map(c=><DropCard key={c.id} config={c} onDone={onDone}/>)}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginBottom:14}}>
+        <ImportDrop type="production" icon="🏭" color="cyan"
+          label="Import Production — PDT_MOIS_ANNEE_SINEX_SA.xlsx"
+          onSuccess={()=>charger()}/>
+        <ImportDrop type="stocks" icon="📦" color="amber"
+          label="Import Stocks — STK_MOIS_ANNEE_SINEX_SA.xlsx"
+          onSuccess={()=>charger()}/>
+        <ImportDrop type="tresorerie" icon="💰" color="green"
+          label="Import Trésorerie — TRES_MOIS_ANNEE_SINEX_SA.xlsx"
+          onSuccess={()=>charger()}/>
       </div>
+
+      {/* Historique réel depuis la base */}
       <div className="card">
-        <div className="card-hd"><div className="card-t">Historique des imports</div><span className="cbadge bc">Récents</span></div>
+        <div className="card-hd">
+          <div className="card-t">Historique des importations</div>
+          <span className="cbadge bc">{historique.length} import{historique.length!==1?'s':''}</span>
+        </div>
         <table className="tbl">
-          <thead><tr><th>Date</th><th>Type</th><th>Fichier</th><th>Lignes importées</th><th>Statut</th></tr></thead>
+          <thead><tr>
+            <th>Date</th><th>Type</th><th>Fichier</th><th>Lignes importées</th><th>Statut</th><th>Par</th>
+          </tr></thead>
           <tbody>
             {historique.map((h,i)=>(
               <tr key={i}>
-                <td style={{fontFamily:'var(--mono)',fontSize:10}}>{h.date}</td>
-                <td>{h.type}</td>
-                <td>{h.fichier}</td>
-                <td style={{fontFamily:'var(--mono)'}}>{h.lignes}</td>
-                <td><span className="st sok">✓ Succès</span></td>
+                <td style={{fontFamily:'var(--mono)',fontSize:10,whiteSpace:'nowrap'}}>{fmtDate(h.date_import||h.created_at)}</td>
+                <td><span className="cbadge bc" style={{fontSize:9}}>{h.type_import||h.type||'—'}</span></td>
+                <td style={{color:'var(--text2)',fontSize:11}}>{h.nom_fichier||h.fichier||'—'}</td>
+                <td style={{fontFamily:'var(--mono)'}}>{h.lignes_importees||h.lignes||0}</td>
+                <td>{h.statut==='success'||h.statut==='succes'
+                  ?<span className="st sok">✓ Succès</span>
+                  :h.statut==='erreur'||h.statut==='error'
+                    ?<span className="st sout">✗ Erreur</span>
+                    :<span className="st spend">En cours</span>}
+                </td>
+                <td style={{color:'var(--text3)',fontSize:10}}>{h.importe_par_nom||h.importe_par||'—'}</td>
               </tr>
             ))}
+            {!historique.length && (
+              <tr><td colSpan={6} style={{textAlign:'center',color:'var(--text3)',padding:32}}>
+                {loading?'Chargement...':'Aucun historique d\'importation'}
+              </td></tr>
+            )}
           </tbody>
         </table>
       </div>
