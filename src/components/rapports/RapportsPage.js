@@ -55,9 +55,7 @@ export default function RapportsPage() {
   const sauverConfigEmail = async () => {
     try {
       await api.post('/email/config', config);
-      // Redémarrer les crons avec la nouvelle config
-      await api.post('/email/redemarrer').catch(()=>{});
-      toast.success('Configuration sauvegardée et crons mis à jour ✓');
+      toast.success('Configuration sauvegardée ✓');
       setModalEmail(false);
     } catch(e) { toast.error(e.response?.data?.message||'Erreur'); }
   };
@@ -65,8 +63,8 @@ export default function RapportsPage() {
   const testerSMTP = async () => {
     try {
       await api.post('/email/tester', config);
-      toast.success('Connexion SMTP OK ✓');
-    } catch(e) { toast.error(e.response?.data?.message||'Erreur SMTP'); }
+      toast.success('Email de test envoyé ✓ — vérifiez votre boîte mail');
+    } catch(e) { toast.error(e.response?.data?.message||'Erreur envoi email'); }
   };
 
   const envoyerMaintenant = async (type) => {
@@ -303,29 +301,24 @@ export default function RapportsPage() {
               <label className="tgl"><input type="checkbox" checked={config.actif} onChange={e=>upd('actif',e.target.checked)}/><span className="tgl-sl"/></label>
             </div>
 
-            <div className="sec-title">Configuration SMTP</div>
-            <div className="form-row" style={{marginBottom:10}}>
-              <div className="form-grp">
-                <label className="form-lbl">Serveur SMTP</label>
-                <input type="text" className="form-inp" value={config.smtp_host||'smtp.gmail.com'} onChange={e=>upd('smtp_host',e.target.value)} placeholder="smtp.gmail.com"/>
-              </div>
-              <div className="form-grp" style={{maxWidth:90}}>
-                <label className="form-lbl">Port</label>
-                <input type="text" className="form-inp" value={config.smtp_port||'587'} onChange={e=>upd('smtp_port',e.target.value)}/>
-              </div>
+            <div className="sec-title">Configuration Resend (service email)</div>
+            <div style={{background:'rgba(34,211,238,.05)',border:'1px solid rgba(34,211,238,.15)',borderRadius:8,padding:'10px 12px',marginBottom:10,fontSize:10,color:'var(--text3)'}}>
+              ℹ️ Utilisez <strong style={{color:'var(--cyan)'}}>Resend</strong> pour l'envoi d'emails. Créez un compte gratuit sur{' '}
+              <a href="https://resend.com" target="_blank" rel="noreferrer" style={{color:'var(--cyan)'}}>resend.com</a>{' '}
+              et copiez votre clé API ci-dessous.
             </div>
-            <div className="form-row" style={{marginBottom:10}}>
-              <div className="form-grp">
-                <label className="form-lbl">Email expéditeur</label>
-                <input type="email" className="form-inp" value={config.smtp_user||''} onChange={e=>upd('smtp_user',e.target.value)} placeholder="ssinex.sa@gmail.com"/>
-              </div>
-              <div className="form-grp">
-                <label className="form-lbl">Mot de passe / App password</label>
-                <input type="password" className="form-inp" value={config.smtp_pass||''} onChange={e=>upd('smtp_pass',e.target.value)} placeholder="••••••••"/>
+            <div className="form-grp" style={{marginBottom:10}}>
+              <label className="form-lbl">Clé API Resend *</label>
+              <input type="password" className="form-inp"
+                value={config.resend_api_key||''}
+                onChange={e=>upd('resend_api_key',e.target.value)}
+                placeholder="re_xxxxxxxxxxxxxxxxxxxx"/>
+              <div style={{fontSize:9,color:'var(--text3)',marginTop:4}}>
+                Dashboard Resend → API Keys → Create API Key
               </div>
             </div>
             <div style={{marginBottom:12}}>
-              <button className="btn" style={{fontSize:10}} onClick={testerSMTP}>🔌 Tester la connexion SMTP</button>
+              <button className="btn" style={{fontSize:10}} onClick={testerSMTP}>🔌 Tester l'envoi email</button>
             </div>
             <div className="sec-title">Fréquence</div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginBottom:14}}>
