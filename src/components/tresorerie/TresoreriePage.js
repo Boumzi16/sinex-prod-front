@@ -17,13 +17,18 @@ const MOIS_LISTE = [
 ];
 
 const CATEGORIES_CREDIT = [
-  {v:'all',              l:'Toutes catégories'},
-  {v:'credit_fournisseur',l:'Crédits fournisseurs'},
-  {v:'credit_siege',     l:'Crédits siège'},
-  {v:'credit_filiale',   l:'Crédits filiales'},
-  {v:'credit_bancaire',  l:'Crédits bancaires'},
-  {v:'autre_credit',     l:'Autres crédits'},
+  {v:'all',               l:'Toutes catégories'},
+  {v:'credit_fournisseur',l:'Crédits fournisseurs', desc:'LGEP, TDG, IMEP SA, WHITE WAY, FINE PRINT, POLYPACKS'},
+  {v:'credit_siege',      l:'Crédits siège',        desc:'GROUPE CECO'},
+  {v:'credit_filiale',    l:'Crédits filiales',      desc:'Ô DOUCE TG SARL'},
+  {v:'credit_bancaire',   l:'Crédits bancaires',     desc:'BSIC, BOA, BATG'},
+  {v:'autre_credit',      l:'Autres crédits',        desc:''},
 ];
+
+const FOURNISSEURS = ['LGEP','TDG','IMEP SA','CONOR SARLU','WHITE WAY','FINE PRINT','POLYPACKS','TECHNIPLAST'];
+const CLIENTS     = ['Ô DOUCE TG SARL'];
+const SIEGES      = ['GROUPE CECO'];
+const BANQUES     = ['BSIC','BOA','BATG'];
 
 const TYPE_OPS_CREDIT = [
   {v:'vente',l:'Vente produits'},{v:'recouvrement',l:'Recouvrement client'},
