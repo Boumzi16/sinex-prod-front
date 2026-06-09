@@ -5,7 +5,7 @@ const AuthContext = createContext(null);
 
 export const PERMISSIONS = {
   directeur_general:{ saisirProd:true, validerProd:true,  supprimerProd:true,  tresorerie:'write', stocks:'write', atp:true,  atpSaisie:true,  rapports:true,  kpis:true,  parametres:true,  import:true,  utilisateurs:true,  emailConfig:true  },
-  operateur:        { saisirProd:true, validerProd:false, supprimerProd:false, tresorerie:false,   stocks:'read',  atp:false, atpSaisie:false, rapports:false, kpis:true,  parametres:true,  import:false, utilisateurs:false, emailConfig:false },
+  operateur:        { saisirProd:true, validerProd:false, supprimerProd:false, tresorerie:false,   stocks:'read',  atp:false, atpSaisie:false, rapports:'partiel', kpis:true,  parametres:true,  import:false, utilisateurs:false, emailConfig:false },
   pdg:              { saisirProd:false,validerProd:false, supprimerProd:false, tresorerie:'read',  stocks:'read',  atp:true,  atpSaisie:false, rapports:true,  kpis:true,  parametres:false, import:false, utilisateurs:false, emailConfig:false },
   pca:              { saisirProd:false,validerProd:false, supprimerProd:false, tresorerie:'read',  stocks:'read',  atp:true,  atpSaisie:false, rapports:true,  kpis:true,  parametres:false, import:false, utilisateurs:false, emailConfig:false },
   conseil_admin:    { saisirProd:false,validerProd:false, supprimerProd:false, tresorerie:false,   stocks:false,   atp:true,  atpSaisie:false, rapports:true,  kpis:true,  parametres:false, import:false, utilisateurs:false, emailConfig:false },
@@ -13,7 +13,7 @@ export const PERMISSIONS = {
 
 export const NAV_ACCESS = {
   directeur_general:['/','/production','/atp','/stocks','/tresorerie','/rapports','/import','/parametres','/utilisateurs'],
-  operateur:        ['/','/production','/parametres'],
+  operateur:        ['/','/production','/rapports','/parametres'],
   pdg:              ['/','/atp','/stocks','/tresorerie','/rapports'],
   pca:              ['/','/atp','/stocks','/tresorerie','/rapports'],
   conseil_admin:    ['/','/atp','/rapports'],

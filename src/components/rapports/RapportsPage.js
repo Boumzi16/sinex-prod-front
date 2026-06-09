@@ -39,6 +39,11 @@ export default function RapportsPage() {
   const [config,     setConfig]     = useState(() => { try{return JSON.parse(localStorage.getItem('sinex_email_config'))||DEFAULT_CFG;}catch{return DEFAULT_CFG;} });
 
   const [envoyant, setEnvoyant] = useState(false);
+  const isOperateur = can('rapports') === 'partiel';
+  // Opérateur : pas de rapport trésorerie
+  const cartesVisibles = CARTES.filter(carte =>
+    isOperateur ? carte.id !== 'tresorerie' : true
+  );
 
   const chargerConfig = async () => {
     try {
@@ -193,7 +198,7 @@ export default function RapportsPage() {
 
       {/* Cartes rapports */}
       <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10,marginBottom:14}}>
-        {CARTES.map(c=>(
+        {cartesVisibles.map(c=>(
           <div key={c.id} className="card" style={{textAlign:'center',transition:'transform .15s'}}
             onMouseOver={e=>e.currentTarget.style.transform='translateY(-2px)'}
             onMouseOut={e=>e.currentTarget.style.transform='none'}>
