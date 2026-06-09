@@ -481,11 +481,34 @@ export default function TresoreriePage() {
                 <input type="date" className="form-inp" value={formCred.date_credit} onChange={e=>setFormCred(f=>({...f,date_credit:e.target.value}))}/>
               </div>
             </div>
-            <div className="form-row">
-              <div className="form-grp">
-                <label className="form-lbl">Bénéficiaire</label>
-                <input type="text" className="form-inp" value={formCred.beneficiaire} onChange={e=>setFormCred(f=>({...f,beneficiaire:e.target.value}))} placeholder="Ex: Fournisseur ABC"/>
+            <div className="form-grp" style={{marginBottom:10}}>
+              <label className="form-lbl">Bénéficiaire / Organisme</label>
+              <input type="text" className="form-inp" list="benef-list"
+                value={formCred.beneficiaire}
+                onChange={e=>setFormCred(f=>({...f,beneficiaire:e.target.value}))}
+                placeholder="Tapez ou choisissez..."/>
+              <datalist id="benef-list">
+                {[...FOURNISSEURS,...CLIENTS,...SIEGES,...BANQUES].map(b=><option key={b} value={b}/>)}
+              </datalist>
+              <div style={{display:'flex',flexWrap:'wrap',gap:4,marginTop:6}}>
+                {(formCred.categorie==='credit_fournisseur'?FOURNISSEURS:
+                  formCred.categorie==='credit_filiale'?CLIENTS:
+                  formCred.categorie==='credit_siege'?SIEGES:
+                  formCred.categorie==='credit_bancaire'?BANQUES:
+                  [...FOURNISSEURS,...CLIENTS,...SIEGES,...BANQUES]
+                ).map(b=>(
+                  <button key={b} type="button"
+                    style={{fontSize:9,padding:'2px 8px',borderRadius:12,
+                      border:'1px solid var(--border)',
+                      background:formCred.beneficiaire===b?'var(--cyan)':'var(--bg3)',
+                      color:formCred.beneficiaire===b?'white':'var(--text2)',cursor:'pointer'}}
+                    onClick={()=>setFormCred(f=>({...f,beneficiaire:b}))}>
+                    {b}
+                  </button>
+                ))}
               </div>
+            </div>
+            <div className="form-row">
               <div className="form-grp">
                 <label className="form-lbl">Date d'échéance</label>
                 <input type="date" className="form-inp" value={formCred.date_echeance} onChange={e=>setFormCred(f=>({...f,date_echeance:e.target.value}))}/>
