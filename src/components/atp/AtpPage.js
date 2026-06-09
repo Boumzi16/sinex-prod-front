@@ -263,7 +263,7 @@ export default function AtpPage() {
               <tr>
                 <td style={{fontWeight:600}}>TOTAL</td>
                 <td style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--cyan)'}}>{bmfMtP>0?fmt(bmfMtP+fsMtP+ammMtP):'—'}</td>
-                <td style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--cyan)'}}>32%</td>
+                <td style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--cyan)'}}>{(bmfTxP+fsTxP+ammTxP)>0?fmtP(bmfTxP+fsTxP+ammTxP):'—'}</td>
               </tr>
             </tbody>
           </table>
