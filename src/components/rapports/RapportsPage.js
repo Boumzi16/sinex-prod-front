@@ -67,11 +67,13 @@ export default function RapportsPage() {
     } catch(e) { toast.error(e.response?.data?.message||'Erreur SMTP'); }
   };
 
-  const envoyerMaintenant = async (type) => {
+  const envoyerMaintenant = async (types) => {
     setEnvoyant(true);
+    const moisRap = moisF!=='all' ? moisF : new Date().toISOString().slice(0,7);
+    const liste = Array.isArray(types) ? types : [types];
     try {
-      const moisRap = moisF!=='all' ? moisF : new Date().toISOString().slice(0,7);
-      const r = await api.post('/email/envoyer', {type_rapport:type, mois:moisRap});
+      // Envoyer tous les rapports dans le même email
+      const r = await api.post('/email/envoyer', {types_rapport: liste, mois: moisRap});
       toast.success(r.data.message);
       charger();
     } catch(e) { toast.error(e.response?.data?.message||'Erreur envoi'); }
@@ -390,22 +392,59 @@ export default function RapportsPage() {
             </div>
 
             <div style={{display:'flex',justifyContent:'space-between',gap:8,flexWrap:'wrap'}}>
-              <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
-                <select className="form-sel" style={{fontSize:10,padding:'6px 10px'}}
-                  value={config.type_envoi||'production'}
-                  onChange={e=>upd('type_envoi',e.target.value)}>
-                  <option value="production">Production</option>
-                  <option value="atp">ATP</option>
-                  <option value="stocks">Stocks</option>
-                  <option value="tresorerie">Trésorerie</option>
-                  <option value="rebuts">Rebuts</option>
-                  <option value="tendances">Tendances</option>
-                </select>
-                <button className="btn success" style={{fontSize:10}}
-                  disabled={envoyant}
-                  onClick={()=>envoyerMaintenant(config.type_envoi||'production')}>
-                  {envoyant?'⏳ Envoi...':'📧 Envoyer maintenant'}
-                </button>
+              <div style={{width:'100%'}}>
+                <div style={{fontSize:10,fontWeight:600,color:'var(--text2)',marginBottom:8}}>
+                  Rapports à inclure dans l'email :
+                </div>
+                <div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:12}}>
+                  {[
+                    {v:'production',l:'Production'},
+                    {v:'atp',l:'ATP'},
+                    {v:'stocks',l:'Stocks'},
+                    {v:'tresorerie',l:'Trésorerie'},
+                    {v:'rebuts',l:'Rebuts'},
+                    {v:'tendances',l:'Tendances'},
+                  ].map(opt=>{
+                    const sel = (config.types_envoi||['production']).includes(opt.v);
+                    return (
+                      <label key={opt.v} style={{
+                        display:'flex',alignItems:'center',gap:6,
+                        padding:'5px 12px',borderRadius:8,cursor:'pointer',fontSize:10,
+                        fontWeight:500,
+                        background:sel?'var(--cyan)':'var(--bg3)',
+                        color:sel?'white':'var(--text2)',
+                        border:`1px solid ${sel?'var(--cyan)':'var(--border)'}`,
+                        transition:'all .15s',
+                      }}>
+                        <input type="checkbox" style={{display:'none'}}
+                          checked={sel}
+                          onChange={e=>{
+                            const cur = config.types_envoi||['production'];
+                            const next = e.target.checked
+                              ? [...cur, opt.v]
+                              : cur.filter(x=>x!==opt.v);
+                            upd('types_envoi', next.length?next:['production']);
+                          }}/>
+                        {sel?'✓':''} {opt.l}
+                      </label>
+                    );
+                  })}
+                </div>
+                <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                  <button className="btn" style={{fontSize:9,padding:'4px 10px'}}
+                    onClick={()=>upd('types_envoi',['production','atp','stocks','tresorerie','rebuts','tendances'])}>
+                    Tout sélectionner
+                  </button>
+                  <button className="btn" style={{fontSize:9,padding:'4px 10px'}}
+                    onClick={()=>upd('types_envoi',['production'])}>
+                    Réinitialiser
+                  </button>
+                  <button className="btn success" style={{fontSize:10,marginLeft:'auto'}}
+                    disabled={envoyant}
+                    onClick={()=>envoyerMaintenant(config.types_envoi||['production'])}>
+                    {envoyant?'⏳ Envoi en cours...':'📧 Envoyer maintenant'}
+                  </button>
+                </div>
               </div>
               <button className="btn" onClick={()=>setModalEmail(false)}>Annuler</button>
               <button className="btn primary" onClick={sauverConfigEmail}>✓ Sauvegarder</button>
