@@ -63,8 +63,8 @@ export default function RapportsPage() {
   const testerSMTP = async () => {
     try {
       await api.post('/email/tester', config);
-      toast.success('Connexion SMTP OK ✓');
-    } catch(e) { toast.error(e.response?.data?.message||'Erreur SMTP'); }
+      toast.success('Email de test envoyé ✓ — vérifiez boumzinaraina@gmail.com');
+    } catch(e) { toast.error(e.response?.data?.message||'Erreur envoi'); }
   };
 
   const envoyerMaintenant = async (types) => {
@@ -303,29 +303,13 @@ export default function RapportsPage() {
               <label className="tgl"><input type="checkbox" checked={config.actif} onChange={e=>upd('actif',e.target.checked)}/><span className="tgl-sl"/></label>
             </div>
 
-            <div className="sec-title">Configuration SMTP</div>
-            <div className="form-row" style={{marginBottom:10}}>
-              <div className="form-grp">
-                <label className="form-lbl">Serveur SMTP</label>
-                <input type="text" className="form-inp" value={config.smtp_host||'smtp.gmail.com'} onChange={e=>upd('smtp_host',e.target.value)} placeholder="smtp.gmail.com"/>
-              </div>
-              <div className="form-grp" style={{maxWidth:90}}>
-                <label className="form-lbl">Port</label>
-                <input type="text" className="form-inp" value={config.smtp_port||'587'} onChange={e=>upd('smtp_port',e.target.value)}/>
-              </div>
-            </div>
-            <div className="form-row" style={{marginBottom:10}}>
-              <div className="form-grp">
-                <label className="form-lbl">Email expéditeur</label>
-                <input type="email" className="form-inp" value={config.smtp_user||''} onChange={e=>upd('smtp_user',e.target.value)} placeholder="ssinex.sa@gmail.com"/>
-              </div>
-              <div className="form-grp">
-                <label className="form-lbl">Mot de passe / App password</label>
-                <input type="password" className="form-inp" value={config.smtp_pass||''} onChange={e=>upd('smtp_pass',e.target.value)} placeholder="••••••••"/>
-              </div>
+            <div className="sec-title">Service d'envoi — Resend</div>
+            <div style={{background:'rgba(34,211,238,.05)',border:'1px solid rgba(34,211,238,.15)',borderRadius:8,padding:'10px 12px',marginBottom:10,fontSize:10,color:'var(--text3)'}}>
+              ℹ️ Les emails sont envoyés depuis <strong style={{color:'var(--cyan)'}}>dashboard@sinex-sa.com</strong> via Resend.
+              La clé API est configurée dans Railway.
             </div>
             <div style={{marginBottom:12}}>
-              <button className="btn" style={{fontSize:10}} onClick={testerSMTP}>🔌 Tester la connexion SMTP</button>
+              <button className="btn" style={{fontSize:10}} onClick={testerSMTP}>🔌 Tester l'envoi email</button>
             </div>
             <div className="sec-title">Fréquence</div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginBottom:14}}>
