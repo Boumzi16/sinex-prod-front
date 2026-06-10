@@ -261,15 +261,24 @@ export default function TresoreriePage() {
                 </tr></thead>
                 <tbody>
                   {mvts.map((m,i)=>{
-                    const isC=m.sens==='credit';
+                    const isC = m.sens==='credit';
+                    const isD = m.sens==='debit';
+                    const bgRow = isD?'rgba(220,38,38,.06)':'rgba(5,150,105,.06)';
                     return(
-                      <tr key={i}>
+                      <tr key={i} style={{background:bgRow}}>
                         <td style={{fontFamily:'var(--mono)',fontSize:9,whiteSpace:'nowrap'}}>{fmtDate(m.date_mouvement)}</td>
-                        <td><span className="st sconf" style={{fontSize:8}}>{m.compte_libelle||'—'}</span></td>
-                        <td style={{maxWidth:130,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',fontSize:11}}>{m.description||'—'}</td>
-                        <td style={{textAlign:'right',fontFamily:'var(--mono)',color:'var(--green)',whiteSpace:'nowrap'}}>{isC?`+${fmt(m.montant_fcfa||0)}`:'-'}</td>
-                        <td style={{textAlign:'right',fontFamily:'var(--mono)',color:'var(--red)',whiteSpace:'nowrap'}}>{!isC?`-${fmt(m.montant_fcfa||0)}`:'-'}</td>
-                        <td style={{textAlign:'right',fontFamily:'var(--mono)',fontWeight:600,color:'var(--cyan)',whiteSpace:'nowrap'}}>{fmt(m.solde_apres||0)}</td>
+                        <td><span className="cbadge bc" style={{fontSize:8}}>{m.compte_code||m.compte_libelle||'—'}</span></td>
+                        <td>{isC
+                          ?<span className="st sok" style={{fontSize:9}}>↑ Entrée</span>
+                          :<span className="st sout" style={{fontSize:9}}>↓ Sortie</span>}
+                        </td>
+                        <td style={{fontSize:10,color:'var(--text2)',maxWidth:90,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{m.nature_operation||'—'}</td>
+                        <td style={{maxWidth:120,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',fontSize:11}}>{m.description||'—'}</td>
+                        <td style={{textAlign:'right',fontFamily:'var(--mono)',fontWeight:600,color:isC?'var(--green)':'var(--red)',whiteSpace:'nowrap'}}>
+                          {isC?'+':'-'}{fmt(m.montant_fcfa||0)}
+                        </td>
+                        <td style={{fontSize:9,color:'var(--text3)'}}>{m.piece_justificative||'—'}</td>
+                        <td style={{fontSize:9,color:'var(--text3)'}}>{m.saisi_par_nom||'—'}</td>
                         {isDGwrite&&(
                           <td style={{display:'flex',gap:3}}>
                             <button className="btn amber" style={{fontSize:9,padding:'2px 6px'}}
@@ -280,7 +289,7 @@ export default function TresoreriePage() {
                       </tr>
                     );
                   })}
-                  {!mvts.length&&<tr><td colSpan={isDGwrite?7:6} style={{textAlign:'center',color:'var(--text3)',padding:20}}>Aucun mouvement</td></tr>}
+                  {!mvts.length&&<tr><td colSpan={isDGwrite?7:6} style={{textAlign:'center',color:'var(--text3)',padding:20}} colSpan={isDGwrite?9:7}>Aucun mouvement</td></tr>}
                 </tbody>
               </table>
             </div>
