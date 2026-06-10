@@ -63,8 +63,8 @@ export default function RapportsPage() {
   const testerSMTP = async () => {
     try {
       await api.post('/email/tester', config);
-      toast.success('Email de test envoyé ✓ — vérifiez votre boîte mail');
-    } catch(e) { toast.error(e.response?.data?.message||'Erreur envoi email'); }
+      toast.success('Connexion SMTP OK ✓');
+    } catch(e) { toast.error(e.response?.data?.message||'Erreur SMTP'); }
   };
 
   const envoyerMaintenant = async (type) => {
@@ -301,24 +301,29 @@ export default function RapportsPage() {
               <label className="tgl"><input type="checkbox" checked={config.actif} onChange={e=>upd('actif',e.target.checked)}/><span className="tgl-sl"/></label>
             </div>
 
-            <div className="sec-title">Configuration Resend (service email)</div>
-            <div style={{background:'rgba(34,211,238,.05)',border:'1px solid rgba(34,211,238,.15)',borderRadius:8,padding:'10px 12px',marginBottom:10,fontSize:10,color:'var(--text3)'}}>
-              ℹ️ Utilisez <strong style={{color:'var(--cyan)'}}>Resend</strong> pour l'envoi d'emails. Créez un compte gratuit sur{' '}
-              <a href="https://resend.com" target="_blank" rel="noreferrer" style={{color:'var(--cyan)'}}>resend.com</a>{' '}
-              et copiez votre clé API ci-dessous.
+            <div className="sec-title">Configuration SMTP</div>
+            <div className="form-row" style={{marginBottom:10}}>
+              <div className="form-grp">
+                <label className="form-lbl">Serveur SMTP</label>
+                <input type="text" className="form-inp" value={config.smtp_host||'smtp.gmail.com'} onChange={e=>upd('smtp_host',e.target.value)} placeholder="smtp.gmail.com"/>
+              </div>
+              <div className="form-grp" style={{maxWidth:90}}>
+                <label className="form-lbl">Port</label>
+                <input type="text" className="form-inp" value={config.smtp_port||'587'} onChange={e=>upd('smtp_port',e.target.value)}/>
+              </div>
             </div>
-            <div className="form-grp" style={{marginBottom:10}}>
-              <label className="form-lbl">Clé API Resend *</label>
-              <input type="password" className="form-inp"
-                value={config.resend_api_key||''}
-                onChange={e=>upd('resend_api_key',e.target.value)}
-                placeholder="re_xxxxxxxxxxxxxxxxxxxx"/>
-              <div style={{fontSize:9,color:'var(--text3)',marginTop:4}}>
-                Dashboard Resend → API Keys → Create API Key
+            <div className="form-row" style={{marginBottom:10}}>
+              <div className="form-grp">
+                <label className="form-lbl">Email expéditeur</label>
+                <input type="email" className="form-inp" value={config.smtp_user||''} onChange={e=>upd('smtp_user',e.target.value)} placeholder="ssinex.sa@gmail.com"/>
+              </div>
+              <div className="form-grp">
+                <label className="form-lbl">Mot de passe / App password</label>
+                <input type="password" className="form-inp" value={config.smtp_pass||''} onChange={e=>upd('smtp_pass',e.target.value)} placeholder="••••••••"/>
               </div>
             </div>
             <div style={{marginBottom:12}}>
-              <button className="btn" style={{fontSize:10}} onClick={testerSMTP}>🔌 Tester l'envoi email</button>
+              <button className="btn" style={{fontSize:10}} onClick={testerSMTP}>🔌 Tester la connexion SMTP</button>
             </div>
             <div className="sec-title">Fréquence</div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginBottom:14}}>
@@ -385,9 +390,23 @@ export default function RapportsPage() {
             </div>
 
             <div style={{display:'flex',justifyContent:'space-between',gap:8,flexWrap:'wrap'}}>
-              <button className="btn success" style={{fontSize:10}} onClick={()=>envoyerMaintenant('production')}>
-                📧 Envoyer maintenant (Production)
-              </button>
+              <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
+                <select className="form-sel" style={{fontSize:10,padding:'6px 10px'}}
+                  value={config.type_envoi||'production'}
+                  onChange={e=>upd('type_envoi',e.target.value)}>
+                  <option value="production">Production</option>
+                  <option value="atp">ATP</option>
+                  <option value="stocks">Stocks</option>
+                  <option value="tresorerie">Trésorerie</option>
+                  <option value="rebuts">Rebuts</option>
+                  <option value="tendances">Tendances</option>
+                </select>
+                <button className="btn success" style={{fontSize:10}}
+                  disabled={envoyant}
+                  onClick={()=>envoyerMaintenant(config.type_envoi||'production')}>
+                  {envoyant?'⏳ Envoi...':'📧 Envoyer maintenant'}
+                </button>
+              </div>
               <button className="btn" onClick={()=>setModalEmail(false)}>Annuler</button>
               <button className="btn primary" onClick={sauverConfigEmail}>✓ Sauvegarder</button>
             </div>
