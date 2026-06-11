@@ -55,11 +55,13 @@ export default function StocksPage() {
   const chargerSoldes = useCallback(async () => {
     setLoading(true);
     try {
-      const r = await stocksAPI.soldes();
+      const p = new URLSearchParams();
+      if (moisF !== 'all') p.append('mois', moisF);
+      const r = await api.get(`/stocks/soldes?${p}`);
       setSoldes(Array.isArray(r.data)?r.data:r.data?.data||[]);
     } catch { toast.error('Erreur chargement stocks'); }
     finally { setLoading(false); }
-  }, []);
+  }, [moisF]);
 
   const chargerResume = useCallback(async () => {
     try {
@@ -370,6 +372,9 @@ export default function StocksPage() {
 
           {/* Barre actions */}
           <div style={{display:'flex',gap:8,marginBottom:12,alignItems:'center',flexWrap:'wrap'}}>
+            <select className="form-sel" value={moisF} onChange={e=>setMoisF(e.target.value)}>
+              {MOIS_LISTE.map(m=><option key={m.v} value={m.v}>{m.l}</option>)}
+            </select>
             <div style={{display:'flex',alignItems:'center',gap:6,background:'var(--bg2)',border:'1px solid var(--border)',borderRadius:8,padding:'6px 11px'}}>
               <span style={{color:'var(--text3)'}}>🔍</span>
               <input type="text" placeholder="Rechercher article ou code..." value={search}
