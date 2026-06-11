@@ -120,7 +120,7 @@ export default function TresoreriePage() {
     } catch { setCredits([]); }
   };
 
-  useEffect(()=>{ charger(); },[]);
+  useEffect(()=>{ charger(); },[moisF]); // eslint-disable-line
   useEffect(()=>{ chargerMvts(); chargerFlux(); },[tabActif,moisF,typeFilter,anneeF]); // eslint-disable-line
   useEffect(()=>{ if(ongletPrincipal==='credits') chargerCredits(); },[ongletPrincipal,catFilter]); // eslint-disable-line
 

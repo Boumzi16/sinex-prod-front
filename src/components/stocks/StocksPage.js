@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { stocksAPI } from '../../services/api';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
@@ -52,7 +52,7 @@ export default function StocksPage() {
   const [formSeuil,    setFormSeuil]    = useState({seuil:0});
 
   // ── Chargement ────────────────────────────────────
-  const chargerSoldes = useCallback(async () => {
+  const chargerSoldes = async () => {
     setLoading(true);
     try {
       const p = new URLSearchParams();
@@ -61,9 +61,9 @@ export default function StocksPage() {
       setSoldes(Array.isArray(r.data)?r.data:r.data?.data||[]);
     } catch { toast.error('Erreur chargement stocks'); }
     finally { setLoading(false); }
-  }, [moisF]);
+  };
 
-  const chargerResume = useCallback(async () => {
+  const chargerResume = async () => {
     try {
       const p = new URLSearchParams();
       if (moisF !== 'all') p.append('mois', moisF);
@@ -71,10 +71,16 @@ export default function StocksPage() {
       const r = await api.get(`/stocks/mouvements/resume?${p}`);
       setResume(Array.isArray(r.data)?r.data:[]);
     } catch(e) { console.error(e); setResume([]); }
-  }, [moisF, classeF]);
+  };
 
-  useEffect(() => { chargerSoldes(); }, [chargerSoldes]);
-  useEffect(() => { if (onglet==='mouvements') chargerResume(); }, [onglet, chargerResume]);
+  // Chargement au montage et quand mois/onglet change
+  useEffect(() => {
+    chargerSoldes();
+  }, [moisF]); // eslint-disable-line
+
+  useEffect(() => {
+    if (onglet === 'mouvements') chargerResume();
+  }, [onglet, moisF, classeF]); // eslint-disable-line
 
   const effacerMouvements = async () => {
     const moisTxt = moisF!=='all'?` du mois ${moisF}`:'de TOUS les mois';
