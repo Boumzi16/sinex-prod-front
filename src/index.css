@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-html,body,#root{height:100%;font-family:'Sora',sans-serif;background:#070f1e;color:#f1f5f9;font-size:13px;-webkit-font-smoothing:antialiased}
+html,body,#root{height:100%;font-family:'Sora',sans-serif;background:#070f1e;color:#f1f5f9;font-size:15px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
 :root{
   --bg0:#070f1e;--bg1:#0a1628;--bg2:#0d1f3c;--bg3:#112347;
   --border:#1e3a5f;--border2:#2a4f7a;
@@ -23,13 +23,13 @@ html,body,#root{height:100%;font-family:'Sora',sans-serif;background:#070f1e;col
 .sb-logo{width:36px;height:36px;border-radius:50%;background:#faf8f5;border:2px solid #ede8e0;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.2)}
 .sb-logo-fallback{font-size:14px;font-weight:700;color:var(--cyan)}
 .sb-brand-wrap{overflow:hidden;white-space:nowrap;flex:1}
-.sb-brand-name{font-size:13px;font-weight:600;color:var(--text1)}
-.sb-brand-sub{font-size:9px;color:var(--text3);margin-top:1px}
+.sb-brand-name{font-size:14px;font-weight:600;color:var(--text1)}
+.sb-brand-sub{font-size:10px;color:var(--text3);margin-top:1px}
 .sb-closed .sb-brand-wrap{display:none}
 .sb-nav{flex:1;padding:4px 0;overflow-y:auto}
 .sb-section{font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;padding:10px 14px 3px;white-space:nowrap}
 .sb-closed .sb-section{opacity:0;height:10px;padding:4px 0}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 13px;font-size:12px;color:var(--text2);text-decoration:none;border-left:3px solid transparent;white-space:nowrap;overflow:hidden;transition:all .15s;border-radius:0 8px 8px 0;margin:1px 6px 1px 0}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 13px;font-size:13px;color:var(--text2);text-decoration:none;border-left:3px solid transparent;white-space:nowrap;overflow:hidden;transition:all .15s;border-radius:0 8px 8px 0;margin:1px 6px 1px 0}
 .nav-item:hover{background:var(--c-accent-glow);color:var(--text1)}
 .nav-item.active{background:var(--c-accent-glow);color:var(--cyan);border-left-color:var(--cyan)}
 .nav-ico{font-size:15px;flex-shrink:0;width:16px;text-align:center}
@@ -69,17 +69,17 @@ html,body,#root{height:100%;font-family:'Sora',sans-serif;background:#070f1e;col
 .kpi:hover{border-color:var(--border2)}
 .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
 .kpi.cc::before{background:var(--cyan)}.kpi.cg::before{background:var(--green)}.kpi.cp::before{background:var(--purple)}.kpi.ca::before{background:var(--amber)}.kpi.ct::before{background:var(--teal)}.kpi.cr::before{background:var(--red)}
-.kpi-lbl{font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;line-height:1.3}
-.kpi-val{font-size:20px;font-weight:700;color:var(--text1);font-family:var(--mono);line-height:1}
-.kpi-sub{font-size:9px;margin-top:5px}
+.kpi-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;line-height:1.3}
+.kpi-val{font-size:24px;font-weight:700;color:var(--text1);font-family:var(--mono);line-height:1}
+.kpi-sub{font-size:11px;margin-top:5px}
 .ku{color:var(--green)}.kd{color:var(--red)}.kn{color:var(--text3)}
 .kbar{height:2px;border-radius:2px;margin-top:9px;background:var(--border);overflow:hidden}
 .kbar-f{height:100%;border-radius:2px}
 /* CARDS */
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:14px}
 .card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
-.card-t{font-size:11px;font-weight:600;color:var(--text1)}
-.cbadge{font-size:9px;padding:2px 8px;border-radius:20px;font-family:var(--mono)}
+.card-t{font-size:14px;font-weight:600;color:var(--text1)}
+.cbadge{font-size:11px;padding:3px 10px;border-radius:20px;font-family:var(--mono)}
 .bc{background:rgba(34,211,238,.1);color:var(--cyan);border:1px solid rgba(34,211,238,.2)}
 .bg{background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.2)}
 .ba{background:rgba(251,191,36,.1);color:var(--amber);border:1px solid rgba(251,191,36,.2)}
@@ -87,19 +87,19 @@ html,body,#root{height:100%;font-family:'Sora',sans-serif;background:#070f1e;col
 .bp{background:rgba(167,139,250,.1);color:var(--purple);border:1px solid rgba(167,139,250,.2)}
 /* TABLES */
 .tbl{width:100%;border-collapse:collapse}
-.tbl th{font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;padding:5px 6px;text-align:left;border-bottom:1px solid var(--border)}
-.tbl td{font-size:11px;padding:7px 6px;border-bottom:1px solid rgba(30,58,95,.4);color:var(--text2)}
+.tbl th{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;padding:10px 11px;text-align:left;border-bottom:1px solid var(--border)}
+.tbl td{font-size:13px;padding:9px 11px;border-bottom:1px solid rgba(30,58,95,.4);color:var(--text2)}
 .tbl tr:last-child td{border-bottom:none}
 .tbl tr:hover td{background:rgba(34,211,238,.03);color:var(--text1)}
 /* STATUS */
-.st{font-size:9px;padding:2px 7px;border-radius:20px;font-weight:500;font-family:var(--mono);display:inline-block}
+.st{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500;font-family:var(--mono);display:inline-block}
 .sok{background:rgba(52,211,153,.12);color:var(--green)}
 .slow{background:rgba(251,191,36,.12);color:var(--amber)}
 .sout{background:rgba(248,113,113,.12);color:var(--red)}
 .spend{background:rgba(167,139,250,.12);color:var(--purple)}
 .sconf{background:rgba(34,211,238,.12);color:var(--cyan)}
 /* BUTTONS */
-.btn{display:inline-flex;align-items:center;gap:5px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px 13px;font-size:11px;color:var(--text2);cursor:pointer;font-family:var(--font);transition:all .15s}
+.btn{display:inline-flex;align-items:center;gap:5px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 15px;font-size:12.5px;color:var(--text2);cursor:pointer;font-family:var(--font);transition:all .15s}
 .btn:hover{border-color:var(--cyan);color:var(--cyan)}
 .btn.primary{background:rgba(34,211,238,.1);border-color:rgba(34,211,238,.3);color:var(--cyan)}
 .btn.success{background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.3);color:var(--green)}
@@ -108,10 +108,10 @@ html,body,#root{height:100%;font-family:'Sora',sans-serif;background:#070f1e;col
 /* FORMS */
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
 .form-grp{display:flex;flex-direction:column;gap:5px}
-.form-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px}
-.form-inp{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text1);font-family:var(--font);font-size:12px;outline:none;transition:border-color .15s;width:100%}
+.form-lbl{font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px}
+.form-inp{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 13px;color:var(--text1);font-family:var(--font);font-size:13px;outline:none;transition:border-color .15s;width:100%}
 .form-inp:focus{border-color:var(--cyan)}
-.form-sel{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text1);font-family:var(--font);font-size:12px;outline:none;cursor:pointer}
+.form-sel{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 13px;color:var(--text1);font-family:var(--font);font-size:13px;outline:none;cursor:pointer}
 .pbar{height:5px;border-radius:3px;background:var(--border);overflow:hidden;margin-top:3px}
 .pbar-f{height:100%;border-radius:3px;transition:width .3s}
 /* TOTAL */
@@ -361,26 +361,39 @@ html,body,#root{height:100%;font-family:'Sora',sans-serif;background:#070f1e;col
 /* ══════════════════════════════════════════
    MODERNISATION GLOBALE — lisibilité
    ══════════════════════════════════════════ */
-body { font-size:13px; line-height:1.6; }
-.card { border-radius:12px; }
-.card-t { font-size:13px; font-weight:600; }
-.kpi { border-radius:12px; padding:14px 16px; }
-.kpi-val { font-size:22px; font-weight:700; line-height:1.2; }
-.kpi-lbl { font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
-.kpi-sub { font-size:10px; margin-top:2px; }
-.btn { font-size:11px; padding:7px 14px; border-radius:8px; font-weight:500; letter-spacing:.2px; }
-.form-inp, .form-sel { font-size:12px; padding:9px 12px; border-radius:8px; }
-.form-lbl { font-size:11px; font-weight:500; margin-bottom:5px; }
-.tbl th { font-size:10.5px; padding:9px 10px; font-weight:600; text-transform:uppercase; letter-spacing:.4px; }
-.tbl td { font-size:11.5px; padding:8px 10px; }
-.modal { border-radius:14px; padding:24px; }
-.modal-title { font-size:14px; font-weight:700; margin-bottom:18px; }
-.cbadge { font-size:9.5px; font-weight:600; padding:3px 9px; border-radius:10px; }
-.sec-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; margin-bottom:10px; }
-.st { font-size:9.5px; font-weight:600; padding:3px 8px; border-radius:8px; }
-.fin-val { font-size:16px; font-weight:700; }
-.fin-lbl { font-size:9.5px; text-transform:uppercase; letter-spacing:.4px; }
-.tot-val { font-size:14px; font-weight:700; }
+html, body, #root { font-size: 15px; line-height: 1.65; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+.card { border-radius: 12px; }
+.card-t { font-size: 14px; font-weight: 600; }
+.card-hd { margin-bottom: 14px; }
+.kpi { border-radius: 12px; padding: 15px 16px; }
+.kpi-val { font-size: 24px; font-weight: 700; line-height: 1.2; }
+.kpi-lbl { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 5px; }
+.kpi-sub { font-size: 11px; margin-top: 3px; }
+.btn { font-size: 12.5px; padding: 8px 15px; border-radius: 8px; font-weight: 500; letter-spacing: .2px; }
+.form-inp, .form-sel { font-size: 13px; padding: 9px 13px; border-radius: 8px; }
+.form-lbl { font-size: 12px; font-weight: 500; margin-bottom: 5px; }
+.tbl th { font-size: 11px; padding: 10px 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+.tbl td { font-size: 13px; padding: 9px 11px; }
+.modal { border-radius: 14px; padding: 26px; }
+.modal-title { font-size: 15px; font-weight: 700; margin-bottom: 18px; }
+.cbadge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 10px; }
+.sec-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; }
+.st { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 8px; }
+.fin-val { font-size: 17px; font-weight: 700; }
+.fin-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .4px; }
+.tot-val { font-size: 15px; font-weight: 700; }
+.tot-lbl { font-size: 12px; font-weight: 600; }
+.nav-item { font-size: 13px; }
+.sb-brand-name { font-size: 14px; }
+.sb-brand-sub { font-size: 10px; }
+.sb-section { font-size: 9px; }
+.user-name { font-size: 12px; }
+.user-role { font-size: 10px; }
+.topbar-date { font-size: 12px; }
+.live-badge { font-size: 11px; }
+.role-badge { font-size: 10px; padding: 3px 11px; }
+.logout-btn { font-size: 12px; padding: 8px; }
+.treso-tab { font-size: 12.5px; padding: 7px 14px; }
 
 /* ══════════════════════════════════════════
    RESPONSIVE — Smartphones modernes
@@ -411,13 +424,13 @@ body { font-size:13px; line-height:1.6; }
   /* Tableaux scrollables */
   .tbl-wrap, .card { overflow-x:auto; }
   .tbl { min-width:600px; }
-  .tbl th, .tbl td { font-size:10px; padding:7px 8px; }
+  .tbl th, .tbl td { font-size: 11px; padding: 7px 8px; }
 
   /* Textes */
-  .card-t { font-size:12px; }
-  .kpi-val { font-size:18px; }
-  .btn { font-size:10.5px; padding:7px 11px; }
-  .form-inp, .form-sel { font-size:14px; } /* 14px min pour iOS */
+  .card-t { font-size: 13px; }
+  .kpi-val { font-size: 20px; }
+  .btn { font-size: 11.5px; padding: 7px 12px; }
+  .form-inp, .form-sel { font-size: 14px; } /* 14px min pour iOS */
 
   /* Sidebar overlay */
   .sb-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:199; }
