@@ -48,6 +48,17 @@ export default function StocksPage() {
     finally { setLoading(false); }
   };
 
+  const effacerMouvements = async () => {
+    const moisTxt = moisF !== 'all' ? ` du mois ${moisF}` : ' de TOUS les mois';
+    if (!window.confirm(`⚠ Effacer tous les mouvements de stock${moisTxt} ? Cette action est irréversible.`)) return;
+    try {
+      const params = moisF !== 'all' ? `?mois=${moisF}` : '';
+      await api.delete(`/stocks/mouvements/effacer${params}`);
+      toast.success('Mouvements de stock effacés ✓');
+      chargerMvts(); chargerSoldes();
+    } catch(e) { toast.error(e.response?.data?.message||'Erreur'); }
+  };
+
   const chargerMvts = async () => {
     try {
       const params = {};
@@ -290,6 +301,11 @@ export default function StocksPage() {
               <option value="3">Classe 3 — Produits finis</option>
             </select>
             <button className="btn" style={{marginLeft:'auto'}} onClick={chargerMvts}>🔍 Filtrer</button>
+            {isDGwrite && (
+              <button className="btn danger" style={{fontSize:10}} onClick={effacerMouvements}>
+                🗑 Effacer les mouvements
+              </button>
+            )}
           </div>
 
           <div className="card" style={{overflowX:'auto'}}>
