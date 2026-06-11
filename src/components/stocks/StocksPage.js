@@ -299,50 +299,77 @@ export default function StocksPage() {
               <option value="3">Classe 3 — Produits finis</option>
             </select>
             <button className="btn" style={{marginLeft:'auto'}} onClick={chargerMvts}>🔍 Filtrer</button>
+            {isDGwrite && (
+              <button className="btn danger" style={{fontSize:10}} onClick={effacerMouvements}>🗑 Effacer</button>
+            )}
           </div>
 
           <div className="card" style={{overflowX:'auto'}}>
             <div className="card-hd">
-              <div className="card-t">Historique des mouvements de stock</div>
-              <span className="cbadge bc">{mvts.length} mouvements</span>
+              <div className="card-t">Mouvements de stock — Vue par article</div>
+              <span className="cbadge bc">{resume.length} articles</span>
             </div>
-            <table className="tbl" style={{minWidth:700}}>
-              <thead><tr>
-                <th>Date</th><th>Article</th><th>Classe</th><th>Type</th>
-                <th style={{textAlign:'right'}}>Quantité</th>
-                <th style={{textAlign:'right'}}>Valeur HT</th>
-                <th>Motif</th><th>Par</th>
-                {isDGwrite&&<th>Actions</th>}
-              </tr></thead>
+            <table className="tbl" style={{minWidth:1100,fontSize:10}}>
+              <thead>
+                <tr>
+                  <th style={{textAlign:'center',width:36}}>N°</th>
+                  <th style={{width:90}}>Code</th>
+                  <th style={{minWidth:200}}>Désignation / Article</th>
+                  <th style={{textAlign:'center',width:60}}>Unité</th>
+                  <th style={{textAlign:'right',width:100}}>Prix HT (FCFA)</th>
+                  <th style={{textAlign:'right',width:110,background:'rgba(8,145,178,.10)',color:'var(--cyan)'}}>
+                    Stock début mois<br/><span style={{fontSize:8,fontWeight:400}}>(solde mois préc.)</span>
+                  </th>
+                  <th style={{textAlign:'right',width:100,background:'rgba(220,38,38,.08)',color:'var(--red)'}}>
+                    Sorties du mois
+                  </th>
+                  <th style={{textAlign:'right',width:100,background:'rgba(5,150,105,.08)',color:'var(--green)'}}>
+                    Entrées du mois
+                  </th>
+                  <th style={{textAlign:'right',width:110,background:'rgba(8,145,178,.08)',color:'var(--cyan)'}}>
+                    Solde fin de mois<br/><span style={{fontSize:8,fontWeight:400}}>(auto)</span>
+                  </th>
+                  <th style={{textAlign:'right',width:120}}>Valeur HT stock (FCFA)</th>
+                </tr>
+              </thead>
               <tbody>
-                {mvts.map((m,i)=>(
-                  <tr key={i}>
-                    <td style={{fontFamily:'var(--mono)',fontSize:9,whiteSpace:'nowrap'}}>{m.date_mouvement?.slice(0,10)||'—'}</td>
-                    <td style={{fontWeight:500,fontSize:11}}>{m.article_libelle||'—'}</td>
-                    <td><span className="cbadge bc" style={{fontSize:8}}>Cl.{m.classe}</span></td>
-                    <td>{m.type_mouvement==='entree'
-                      ?<span className="st sok">↑ Entrée</span>
-                      :<span className="st sout">↓ Sortie</span>}
-                    </td>
-                    <td style={{textAlign:'right',fontFamily:'var(--mono)',color:m.type_mouvement==='entree'?'var(--green)':'var(--red)'}}>
-                      {m.type_mouvement==='entree'?'+':'-'}{fmt(m.quantite)} {m.unite}
-                    </td>
-                    <td style={{textAlign:'right',fontFamily:'var(--mono)'}}>{fmt(m.valeur_ht||0)}</td>
-                    <td style={{color:'var(--text3)',fontSize:10,maxWidth:150,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{m.motif||'—'}</td>
-                    <td style={{color:'var(--text3)',fontSize:10}}>{m.saisi_par_nom||'Auto'}</td>
-                    {isDGwrite && (
-                      <td style={{display:'flex',gap:4}}>
-                        <button className="btn amber" style={{fontSize:9,padding:'3px 6px'}}
-                          onClick={()=>{setModalEditMvt(m);setFormMvt({quantite:m.quantite,date:m.date_mouvement?.slice(0,10),motif:m.motif,type_mouvement:m.type_mouvement});}}>
-                          ✎
-                        </button>
-                        <button className="btn danger" style={{fontSize:9,padding:'3px 6px'}} onClick={()=>deleteMvt(m.id)}>✕</button>
+                {(resume.length ? resume : []).map((a,i)=>{
+                  const bg = i%2===0?'var(--bg2)':undefined;
+                  const alerte = parseFloat(a.solde_fin||0) <= 0;
+                  return (
+                    <tr key={i} style={{background:bg}}>
+                      <td style={{textAlign:'center',color:'var(--text3)',fontSize:9}}>{i+1}</td>
+                      <td style={{fontFamily:'var(--mono)',fontSize:9,color:'var(--text3)'}}>{a.code}</td>
+                      <td style={{fontWeight:600,fontSize:11}}>{a.libelle}</td>
+                      <td style={{textAlign:'center',color:'var(--text2)'}}>{a.unite}</td>
+                      <td style={{textAlign:'right',fontFamily:'var(--mono)',color:'var(--text2)'}}>
+                        {a.prix_ht>0?fmt(a.prix_ht):'—'}
                       </td>
-                    )}
-                  </tr>
-                ))}
-                {!mvts.length && (
-                  <tr><td colSpan={isDGwrite?9:8} style={{textAlign:'center',color:'var(--text3)',padding:32}}>Aucun mouvement</td></tr>
+                      <td style={{textAlign:'right',fontFamily:'var(--mono)',fontWeight:600,color:'var(--cyan)',background:'rgba(8,145,178,.06)'}}>
+                        {fmt(a.stock_debut||0)}
+                      </td>
+                      <td style={{textAlign:'right',fontFamily:'var(--mono)',fontWeight:600,color:'var(--red)',background:'rgba(220,38,38,.04)'}}>
+                        {parseFloat(a.sorties||0)>0?fmt(a.sorties):'—'}
+                      </td>
+                      <td style={{textAlign:'right',fontFamily:'var(--mono)',fontWeight:600,color:'var(--green)',background:'rgba(5,150,105,.04)'}}>
+                        {parseFloat(a.entrees||0)>0?fmt(a.entrees):'—'}
+                      </td>
+                      <td style={{textAlign:'right',fontFamily:'var(--mono)',fontWeight:700,
+                          color:alerte?'var(--red)':'var(--cyan)',
+                          background:'rgba(8,145,178,.06)'}}>
+                        {fmt(a.solde_fin||0)}
+                        {alerte&&<span style={{fontSize:8,marginLeft:3}}>⚠</span>}
+                      </td>
+                      <td style={{textAlign:'right',fontFamily:'var(--mono)',color:'var(--text2)'}}>
+                        {parseFloat(a.valeur_ht||0)>0?fmt(a.valeur_ht):'—'}
+                      </td>
+                    </tr>
+                  );
+                })}
+                {!resume.length && (
+                  <tr><td colSpan={10} style={{textAlign:'center',color:'var(--text3)',padding:32}}>
+                    Aucun mouvement — uploadez un fichier STK via Import
+                  </td></tr>
                 )}
               </tbody>
             </table>
