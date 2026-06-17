@@ -8,33 +8,33 @@ import toast from 'react-hot-toast';
 const fmt = (n) => new Intl.NumberFormat('fr-FR').format(Math.round(parseFloat(n)||0));
 
 const COMPO = {
-  C12: {p32:12,p17:0,bou:12,e15:12,e05:0,e1:0,c12:1,c24:0,hil:0,btl:12},
-  C24: {p32:0,p17:24,bou:24,e15:0,e05:24,e1:0,c12:0,c24:1,hil:0,btl:24},
-  F615:{p32:6,p17:0,bou:6,e15:6,e05:0,e1:0,c12:0,c24:0,hil:0,btl:6},
-  F605:{p32:0,p17:6,bou:6,e15:0,e05:6,e1:0,c12:0,c24:0,hil:0,btl:6},
-  F61: {p32:6,p17:0,bou:6,e15:0,e05:0,e1:6,c12:0,c24:0,hil:0,btl:6},
-  HILIO:{p32:0,p17:0,bou:0,e15:0,e05:0,e1:0,c12:0,c24:0,hil:30,btl:0},
+  C12: {p32:12,p17:0,bou:12,e15:12,e05:0,sac:0,c12:1,c24:0,hil:0,btl:12},
+  C24: {p32:0,p17:24,bou:24,e15:0,e05:24,sac:0,c12:0,c24:1,hil:0,btl:24},
+  F615:{p32:6,p17:0,bou:6,e15:6,e05:0,sac:0,c12:0,c24:0,hil:0,btl:6},
+  F605:{p32:0,p17:6,bou:6,e15:0,e05:6,sac:0,c12:0,c24:0,hil:0,btl:6},
+  F61: {p32:6,p17:0,bou:6,e15:0,e05:0,sac:0,c12:0,c24:0,hil:0,btl:6},
+  HILIO:{p32:0,p17:0,bou:0,e15:0,e05:0,sac:30,c12:0,c24:0,hil:0,btl:0},
 };
 
+// Sans étiquettes 1L — sachets HILIO ajouté — étiq scindées C12/C24
 const INTRANTS = [
-  {key:'p32',nom:'Préformes 32g',  rKey:'rPref32'},
-  {key:'p17',nom:'Préformes 17g',  rKey:'rPref17'},
-  {key:'bou',nom:'Bouchons',       rKey:'rBouch'},
-  {key:'e15',nom:'Étiq. 1,5L',     rKey:'rEti'},
-  {key:'e05',nom:'Étiq. 0,5L',     rKey:'rEti'},
-  {key:'e1', nom:'Étiq. 1L',       rKey:'rEti'},
-  {key:'c12',nom:'Cartons C12',    rKey:'rCtnC12'},
-  {key:'c24',nom:'Cartons C24',    rKey:'rCtnC24'},
-  {key:'hil',nom:'Sachets HILIO',  rKey:'rHilio'},
+  {key:'p32', nom:'Préformes 32g',   rKey:'rPref32'},
+  {key:'p17', nom:'Préformes 17g',   rKey:'rPref17'},
+  {key:'bou', nom:'Bouchons',        rKey:'rBouch'},
+  {key:'c12', nom:'Cartons C12',     rKey:'rCtnC12'},
+  {key:'c24', nom:'Cartons C24',     rKey:'rCtnC24'},
+  {key:'sac', nom:'Sachets HILIO',   rKey:'rHilio'},
+  {key:'e15', nom:'Étiq. C12 (1,5L)',rKey:'rEtiC12'},
+  {key:'e05', nom:'Étiq. C24 (0,5L)',rKey:'rEtiC24'},
 ];
 
 const FORMATS = [
-  {key:'C12',nom:'Carton C12',unite:'cartons'},
-  {key:'C24',nom:'Carton C24',unite:'cartons'},
-  {key:'F615',nom:'F06/1,5L',unite:'fardeaux'},
-  {key:'F605',nom:'F06/0,5L',unite:'fardeaux'},
-  {key:'F61',nom:'F06/1L',unite:'fardeaux'},
-  {key:'HILIO',nom:'HILIO',unite:'packs'},
+  {key:'C12',  nom:'Carton C12',  unite:'cartons'},
+  {key:'C24',  nom:'Carton C24',  unite:'cartons'},
+  {key:'F615', nom:'F06/1,5L',    unite:'fardeaux'},
+  {key:'F605', nom:'F06/0,5L',    unite:'fardeaux'},
+  {key:'F61',  nom:'F06/1L',      unite:'fardeaux'},
+  {key:'HILIO',nom:'HILIO',       unite:'packs'},
 ];
 
 const MOIS_LISTE = [
@@ -44,11 +44,20 @@ const MOIS_LISTE = [
   {v:'2026-10',l:'Octobre 2026'},{v:'2026-11',l:'Novembre 2026'},{v:'2026-12',l:'Décembre 2026'},
 ];
 
-const VIDE = {date:'',jours:1,C12:0,C24:0,F615:0,F605:0,F61:0,HILIO:0,rPref32:0,rPref17:0,rBouch:0,rCtnC12:0,rCtnC24:0,rHilio:0,rEti:0};
+const VIDE = {
+  date:'',jours:1,
+  C12:0,C24:0,F615:0,F605:0,F61:0,HILIO:0,
+  rPref32:0,rPref17:0,rBouch:0,rCtnC12:0,rCtnC24:0,
+  rHilio:0,rEtiC12:0,rEtiC24:0,
+};
 
 function calcTheo(form) {
-  const r={p32:0,p17:0,bou:0,e15:0,e05:0,e1:0,c12:0,c24:0,hil:0};
-  FORMATS.forEach(f=>{const c=COMPO[f.key];if(!c)return;Object.keys(r).forEach(m=>{r[m]+=(c[m]||0)*(+form[f.key]||0);});});
+  const r={p32:0,p17:0,bou:0,e15:0,e05:0,sac:0,c12:0,c24:0,hil:0};
+  FORMATS.forEach(f=>{
+    const c=COMPO[f.key];
+    if(!c)return;
+    Object.keys(r).forEach(m=>{ r[m]+=(c[m]||0)*(+form[f.key]||0); });
+  });
   return r;
 }
 
@@ -58,7 +67,7 @@ export default function ProductionPage() {
   const [mois,    setMois]    = useState(new Date().toISOString().slice(0,7));
   const [loading, setLoading] = useState(true);
   const [modal,   setModal]   = useState(false);
-  const [editId,  setEditId]  = useState(null); // null=nouvelle saisie, sinon id à modifier
+  const [editId,  setEditId]  = useState(null);
   const [form,    setForm]    = useState(VIDE);
   const [theo,    setTheo]    = useState({});
 
@@ -94,21 +103,22 @@ export default function ProductionPage() {
   const ouvrirModification = (s) => {
     setEditId(s.id);
     setForm({
-      date: s.date_production?.slice(0,10)||'',
+      date:  s.date_production?.slice(0,10)||'',
       jours: s.jours_ouvres||1,
-      C12: s.c12||s.productions?.C12||0,
-      C24: s.c24||s.productions?.C24||0,
-      F615: s.f615||s.productions?.F615||0,
-      F605: s.f605||s.productions?.F605||0,
-      F61: s.f61||s.productions?.F61||0,
+      C12:   s.c12||s.productions?.C12||0,
+      C24:   s.c24||s.productions?.C24||0,
+      F615:  s.f615||s.productions?.F615||0,
+      F605:  s.f605||s.productions?.F605||0,
+      F61:   s.f61||s.productions?.F61||0,
       HILIO: s.hilio||s.productions?.HILIO||0,
       rPref32: s.rebuts?.pref32||0,
       rPref17: s.rebuts?.pref17||0,
       rBouch:  s.rebuts?.bouchons||0,
       rCtnC12: s.rebuts?.ctn_c12||0,
       rCtnC24: s.rebuts?.ctn_c24||0,
-      rHilio:  s.rebuts?.hilio||0,
-      rEti:    (s.rebuts?.etiq_c12||0)+(s.rebuts?.etiq_c24||0),
+      rHilio:  s.rebuts?.hilio||s.rebuts?.hilio_rebut||0,
+      rEtiC12: s.rebuts?.etiq_c12||0,
+      rEtiC24: s.rebuts?.etiq_c24||0,
     });
     setTheo(calcTheo({...s}));
     setModal(true);
@@ -119,12 +129,21 @@ export default function ProductionPage() {
     try {
       const payload = {
         date_production: form.date,
-        jours_ouvres: form.jours,
+        jours_ouvres:    form.jours,
         productions: FORMATS.map(f=>({code:f.key, quantite:+form[f.key]||0})),
-        rebuts: {pref32:+form.rPref32||0,pref17:+form.rPref17||0,bouchons:+form.rBouch||0,
-          ctn_c12:+form.rCtnC12||0,ctn_c24:+form.rCtnC24||0,hilio:+form.rHilio||0,etiquettes:+form.rEti||0},
+        rebuts: {
+          pref32:   +form.rPref32||0,
+          pref17:   +form.rPref17||0,
+          bouchons: +form.rBouch||0,
+          ctn_c12:  +form.rCtnC12||0,
+          ctn_c24:  +form.rCtnC24||0,
+          hilio:    +form.rHilio||0,
+          etiq_c12: +form.rEtiC12||0,
+          etiq_c24: +form.rEtiC24||0,
+          // compatibilité ancienne colonne
+          etiquettes: (+form.rEtiC12||0)+(+form.rEtiC24||0),
+        },
       };
-
       if (editId) {
         await api.put(`/production/${editId}`, payload);
         toast.success('Saisie modifiée ✓');
@@ -149,9 +168,8 @@ export default function ProductionPage() {
   const sumQty = {C12:0,C24:0,F615:0,F605:0,F61:0,HILIO:0};
   conf.forEach(s=>{ FORMATS.forEach(f=>{ sumQty[f.key]+=parseFloat(s[f.key.toLowerCase()]||s.productions?.[f.key]||0); }); });
 
-  // Consommations réelles = théoriques + rebuts
   const theoCum = calcTheo(sumQty);
-  const rebutsCum = {rPref32:0,rPref17:0,rBouch:0,rCtnC12:0,rCtnC24:0,rHilio:0,rEti:0};
+  const rebutsCum = {rPref32:0,rPref17:0,rBouch:0,rCtnC12:0,rCtnC24:0,rHilio:0,rEtiC12:0,rEtiC24:0};
   conf.forEach(s => {
     if(s.rebuts){
       rebutsCum.rPref32 += parseFloat(s.rebuts.pref32||0);
@@ -159,8 +177,9 @@ export default function ProductionPage() {
       rebutsCum.rBouch  += parseFloat(s.rebuts.bouchons||0);
       rebutsCum.rCtnC12 += parseFloat(s.rebuts.ctn_c12||0);
       rebutsCum.rCtnC24 += parseFloat(s.rebuts.ctn_c24||0);
-      rebutsCum.rHilio  += parseFloat(s.rebuts.hilio||0);
-      rebutsCum.rEti    += parseFloat(s.rebuts.etiquettes||0);
+      rebutsCum.rHilio  += parseFloat(s.rebuts.hilio||s.rebuts.hilio_rebut||0);
+      rebutsCum.rEtiC12 += parseFloat(s.rebuts.etiq_c12||0);
+      rebutsCum.rEtiC24 += parseFloat(s.rebuts.etiq_c24||0);
     }
   });
 
@@ -192,12 +211,12 @@ export default function ProductionPage() {
           <div className="card-t">Saisies — {MOIS_LISTE.find(m=>m.v===mois)?.l}</div>
           <span className="cbadge bc">Journalier</span>
         </div>
-        <table className="tbl" style={{minWidth:900}}>
+        <table className="tbl" style={{minWidth:1000}}>
           <thead>
             <tr>
               <th rowSpan={2}>Date</th>
               <th colSpan={6} style={{textAlign:'center',borderBottom:'1px solid var(--border)'}}>Produits finis</th>
-              <th colSpan={6} style={{textAlign:'center',color:'var(--amber)',borderBottom:'1px solid var(--border)'}}>Rebuts</th>
+              <th colSpan={8} style={{textAlign:'center',color:'var(--amber)',borderBottom:'1px solid var(--border)'}}>Rebuts</th>
               <th rowSpan={2}>Jours</th>
               <th rowSpan={2}>Opérateur</th>
               <th rowSpan={2}>Statut</th>
@@ -210,7 +229,9 @@ export default function ProductionPage() {
               <th style={{color:'var(--amber)'}}>Bouch.</th>
               <th style={{color:'var(--amber)'}}>CtnC12</th>
               <th style={{color:'var(--amber)'}}>CtnC24</th>
-              <th style={{color:'var(--amber)'}}>Étiq.</th>
+              <th style={{color:'var(--green)'}}>Sachets</th>
+              <th style={{color:'#3B82F6'}}>ÉtiqC12</th>
+              <th style={{color:'#8B5CF6'}}>ÉtiqC24</th>
             </tr>
           </thead>
           <tbody>
@@ -225,7 +246,9 @@ export default function ProductionPage() {
                 <td style={{fontFamily:'var(--mono)',color:'var(--amber)'}}>{s.rebuts?.bouchons||0}</td>
                 <td style={{fontFamily:'var(--mono)',color:'var(--amber)'}}>{s.rebuts?.ctn_c12||0}</td>
                 <td style={{fontFamily:'var(--mono)',color:'var(--amber)'}}>{s.rebuts?.ctn_c24||0}</td>
-                <td style={{fontFamily:'var(--mono)',color:'var(--amber)'}}>{(s.rebuts?.etiq_c12||0)+(s.rebuts?.etiq_c24||0)}</td>
+                <td style={{fontFamily:'var(--mono)',color:'var(--green)'}}>{s.rebuts?.hilio||s.rebuts?.hilio_rebut||0}</td>
+                <td style={{fontFamily:'var(--mono)',color:'#3B82F6'}}>{s.rebuts?.etiq_c12||0}</td>
+                <td style={{fontFamily:'var(--mono)',color:'#8B5CF6'}}>{s.rebuts?.etiq_c24||0}</td>
                 <td style={{fontFamily:'var(--mono)'}}>{s.jours_ouvres||1}</td>
                 <td style={{color:'var(--text3)',fontSize:10}}>{s.saisi_par_nom||'—'}</td>
                 <td>
@@ -247,7 +270,7 @@ export default function ProductionPage() {
               </tr>
             ))}
             {!saisies.length && (
-              <tr><td colSpan={18} style={{textAlign:'center',color:'var(--text3)',padding:32}}>
+              <tr><td colSpan={20} style={{textAlign:'center',color:'var(--text3)',padding:32}}>
                 {loading?'Chargement...':'Aucune saisie pour ce mois'}
               </td></tr>
             )}
@@ -278,7 +301,7 @@ export default function ProductionPage() {
             <thead><tr><th>Intrant</th><th>Théorique</th><th>Rebuts</th><th style={{color:'var(--amber)'}}>Total réel</th></tr></thead>
             <tbody>
               {INTRANTS.map(it=>{
-                const t = theoCum[it.key]||0;
+                const t  = theoCum[it.key]||0;
                 const rb = parseFloat(rebutsCum[it.rKey]||0);
                 return (
                   <tr key={it.key+it.nom}>
@@ -325,7 +348,8 @@ export default function ProductionPage() {
 
             <div className="sec-title">Produits finis</div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginBottom:8}}>
-              {[['C12','C12 (12 btl 1,5L)'],['C24','C24 (24 btl 0,5L)'],['F615','F06/1,5L (6 btl)'],['F605','F06/0,5L (6 btl)'],['F61','F06/1L (6 btl)'],['HILIO','HILIO (30 sachets)']].map(([k,lbl])=>(
+              {[['C12','C12 (12 btl 1,5L)'],['C24','C24 (24 btl 0,5L)'],['F615','F06/1,5L (6 btl)'],
+                ['F605','F06/0,5L (6 btl)'],['F61','F06/1L (6 btl)'],['HILIO','HILIO (30 sachets)']].map(([k,lbl])=>(
                 <div className="form-grp" key={k}>
                   <label className="form-lbl">{lbl}</label>
                   <input type="number" className="form-inp" min={0} value={form[k]}
@@ -337,19 +361,34 @@ export default function ProductionPage() {
             <div style={{background:'rgba(34,211,238,.05)',border:'1px solid rgba(34,211,238,.15)',borderRadius:8,padding:'10px 12px',marginBottom:12}}>
               <div style={{fontSize:9,color:'var(--cyan)',textTransform:'uppercase',letterSpacing:.6,marginBottom:8}}>Consommations théoriques calculées</div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
-                {[['p32','Préf. 32g'],['p17','Préf. 17g'],['bou','Bouchons'],['e15','Étiq. 1,5L'],['e05','Étiq. 0,5L'],['e1','Étiq. 1L'],['c12','Ctn C12'],['c24','Ctn C24'],['hil','Sachets HILIO']].map(([k,lbl])=>(
-                  <div key={k}><div style={{fontSize:9,color:'var(--text3)'}}>{lbl}</div><div style={{fontFamily:'var(--mono)',color:'var(--text1)',fontWeight:600}}>{fmt(theo[k]||0)}</div></div>
+                {[['p32','Préf. 32g'],['p17','Préf. 17g'],['bou','Bouchons'],
+                  ['c12','Ctn C12'],['c24','Ctn C24'],['sac','Sachets HILIO'],
+                  ['e15','Étiq. C12 (1,5L)'],['e05','Étiq. C24 (0,5L)']].map(([k,lbl])=>(
+                  <div key={k}>
+                    <div style={{fontSize:9,color:'var(--text3)'}}>{lbl}</div>
+                    <div style={{fontFamily:'var(--mono)',color:'var(--text1)',fontWeight:600}}>{fmt(theo[k]||0)}</div>
+                  </div>
                 ))}
               </div>
             </div>
 
             <div className="sec-title" style={{color:'var(--amber)'}}>Rebuts par matière</div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8,marginBottom:12}}>
-              {[['rPref32','Préformes 32g'],['rPref17','Préformes 17g'],['rBouch','Bouchons'],['rCtnC12','Cartons C12'],['rCtnC24','Cartons C24'],['rHilio','Sachets HILIO'],['rEti','Étiquettes']].map(([k,lbl])=>(
+              {[
+                ['rPref32','Préformes 32g',   'var(--amber)'],
+                ['rPref17','Préformes 17g',   'var(--amber)'],
+                ['rBouch', 'Bouchons',         'var(--amber)'],
+                ['rCtnC12','Cartons C12',      'var(--amber)'],
+                ['rCtnC24','Cartons C24',      'var(--amber)'],
+                ['rHilio', 'Sachets HILIO',    'var(--green)'],
+                ['rEtiC12','Étiq C12 (1,5L)',  '#3B82F6'],
+                ['rEtiC24','Étiq C24 (0,5L)',  '#8B5CF6'],
+              ].map(([k,lbl,col])=>(
                 <div className="form-grp" key={k}>
-                  <label className="form-lbl" style={{color:'var(--amber)'}}>{lbl}</label>
-                  <input type="number" className="form-inp" min={0} value={form[k]}
-                    onChange={e=>setForm(f=>({...f,[k]:+e.target.value}))} style={{fontFamily:'var(--mono)'}}/>
+                  <label className="form-lbl" style={{color:col}}>{lbl}</label>
+                  <input type="number" className="form-inp" min={0} value={form[k]||0}
+                    onChange={e=>setForm(f=>({...f,[k]:+e.target.value}))}
+                    style={{fontFamily:'var(--mono)',color:col}}/>
                 </div>
               ))}
             </div>
