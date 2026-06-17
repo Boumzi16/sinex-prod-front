@@ -108,7 +108,7 @@ export default function ProductionPage() {
       rCtnC12: s.rebuts?.ctn_c12||0,
       rCtnC24: s.rebuts?.ctn_c24||0,
       rHilio:  s.rebuts?.hilio||0,
-      rEti:    s.rebuts?.etiquettes||0,
+      rEti:    (s.rebuts?.etiq_c12||0)+(s.rebuts?.etiq_c24||0),
     });
     setTheo(calcTheo({...s}));
     setModal(true);
@@ -225,7 +225,7 @@ export default function ProductionPage() {
                 <td style={{fontFamily:'var(--mono)',color:'var(--amber)'}}>{s.rebuts?.bouchons||0}</td>
                 <td style={{fontFamily:'var(--mono)',color:'var(--amber)'}}>{s.rebuts?.ctn_c12||0}</td>
                 <td style={{fontFamily:'var(--mono)',color:'var(--amber)'}}>{s.rebuts?.ctn_c24||0}</td>
-                <td style={{fontFamily:'var(--mono)',color:'var(--amber)'}}>{s.rebuts?.etiquettes||0}</td>
+                <td style={{fontFamily:'var(--mono)',color:'var(--amber)'}}>{(s.rebuts?.etiq_c12||0)+(s.rebuts?.etiq_c24||0)}</td>
                 <td style={{fontFamily:'var(--mono)'}}>{s.jours_ouvres||1}</td>
                 <td style={{color:'var(--text3)',fontSize:10}}>{s.saisi_par_nom||'—'}</td>
                 <td>
