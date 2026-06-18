@@ -33,7 +33,7 @@ export default function DashboardPage() {
     setLoading(true);
     try {
       const [dRes,sRes,tRes] = await Promise.allSettled([
-        dashboardAPI.consolide(mois),
+        dashboardAPI.consolide(mois + '&_t=' + Date.now()),
         stocksAPI.alertes(),
         tresorerieAPI.soldes(),
       ]);
@@ -82,7 +82,7 @@ export default function DashboardPage() {
     Promise.all(
       Array.from({length:moisCourant},(_,i)=>{
         const m = `${annee}-${String(i+1).padStart(2,'0')}`;
-        return dashboardAPI.consolide(m).then(r=>r.data?.kpis||{}).catch(()=>({}));
+        return dashboardAPI.consolide(m + '&_t=' + Date.now()).then(r=>r.data?.kpis||{}).catch(()=>({}));
       })
     ).then(results=>{
       const total = results.reduce((s,k)=>{
