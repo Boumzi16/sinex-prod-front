@@ -179,6 +179,11 @@ export default function DashboardPage() {
     });
   },[loading,kpis,evo,rebuts]);
 
+  // CA du mois calculé à partir des KPIs
+  const caMois = (parseFloat(kpis.c12||0)*PRIX.C12) + (parseFloat(kpis.c24||0)*PRIX.C24) +
+    (parseFloat(kpis.f615||0)*PRIX.F615) + (parseFloat(kpis.f605||0)*PRIX.F605) +
+    (parseFloat(kpis.f61||0)*PRIX.F61) + (parseFloat(kpis.hilio||0)*PRIX.HILIO);
+
   const tresoTotal = treso.reduce((s,c)=>s+parseFloat(c.solde_fcfa||c.solde||0),0);
   const alertes = stocks.filter(s=>s.alerte_stock||s.statut==='low'||s.statut==='out');
 
@@ -297,8 +302,3 @@ export default function DashboardPage() {
   );
 }
 
-// Variable caMois manquante — recalcul inline
-DashboardPage.caMois = (kpis) =>
-  (parseFloat(kpis.c12||0)*PRIX.C12) + (parseFloat(kpis.c24||0)*PRIX.C24) +
-  (parseFloat(kpis.f615||0)*PRIX.F615) + (parseFloat(kpis.f605||0)*PRIX.F605) +
-  (parseFloat(kpis.f61||0)*PRIX.F61) + (parseFloat(kpis.hilio||0)*PRIX.HILIO);
