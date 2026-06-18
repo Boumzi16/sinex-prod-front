@@ -16,42 +16,18 @@ const MOIS_LISTE = [
 
 export default function DashboardPage() {
   const { lastRefresh } = useRefresh();
-  const [mois,   setMois]   = useState(new Date().toISOString().slice(0,7));
-  const [kpis,   setKpis]   = useState({});
-  const [stocks, setStocks] = useState([]);
-  const [treso,  setTreso]  = useState([]);
-  const [evo,    setEvo]    = useState([]);
-  const [rebuts, setRebuts] = useState([]);
-  const [loading,setLoading]= useState(true);
-  const [cpf,    setCpf]    = useState(null);
-  const [caCumule,setCaCumule] = useState(0);
+  const [mois,      setMois]     = useState(new Date().toISOString().slice(0,7));
+  const [kpis,      setKpis]     = useState({});
+  const [stocks,    setStocks]   = useState([]);
+  const [treso,     setTreso]    = useState([]);
+  const [evo,       setEvo]      = useState([]);
+  const [rebuts,    setRebuts]   = useState([]);
+  const [loading,   setLoading]  = useState(true);
+  const [cpf,       setCpf]      = useState(null);
+  const [caCumule,  setCaCumule] = useState(0);
 
   const refFmt=useRef(); const refEvo=useRef(); const refReb=useRef();
   const instFmt=useRef(); const instEvo=useRef(); const instReb=useRef();
-
-  // Clé de rafraîchissement — incrémentée depuis n'importe quelle page via sessionStorage
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  // Écouter les rafraîchissements déclenchés depuis d'autres pages
-  useEffect(() => {
-    const handleStorage = (e) => {
-      if (e.key === 'sinex_refresh') setRefreshKey(k => k+1);
-    };
-    window.addEventListener('storage', handleStorage);
-    // Aussi vérifier le flag au focus de la fenêtre
-    const handleFocus = () => {
-      const flag = sessionStorage.getItem('sinex_need_refresh');
-      if (flag) {
-        sessionStorage.removeItem('sinex_need_refresh');
-        setRefreshKey(k => k+1);
-      }
-    };
-    window.addEventListener('focus', handleFocus);
-    return () => {
-      window.removeEventListener('storage', handleStorage);
-      window.removeEventListener('focus', handleFocus);
-    };
-  }, []);
 
   const charger = async () => {
     setLoading(true);
@@ -96,8 +72,8 @@ export default function DashboardPage() {
     finally { setLoading(false); }
   };
 
-  // Recharger quand mois change OU quand refreshKey change
-  useEffect(() => { charger(); }, [mois, refreshKey]); // eslint-disable-line
+  // Se déclenche quand le mois change OU quand un import est effectué ailleurs
+  useEffect(() => { charger(); }, [mois, lastRefresh]); // eslint-disable-line
 
   // CA cumulé annuel
   useEffect(()=>{
@@ -116,7 +92,7 @@ export default function DashboardPage() {
       },0);
       setCaCumule(total);
     });
-  },[mois, refreshKey]); // eslint-disable-line
+  },[mois, lastRefresh]); // eslint-disable-line
 
   useEffect(()=>{
     if(loading) return;
@@ -179,7 +155,6 @@ export default function DashboardPage() {
     });
   },[loading,kpis,evo,rebuts]);
 
-  // CA du mois calculé à partir des KPIs
   const caMois = (parseFloat(kpis.c12||0)*PRIX.C12) + (parseFloat(kpis.c24||0)*PRIX.C24) +
     (parseFloat(kpis.f615||0)*PRIX.F615) + (parseFloat(kpis.f605||0)*PRIX.F605) +
     (parseFloat(kpis.f61||0)*PRIX.F61) + (parseFloat(kpis.hilio||0)*PRIX.HILIO);
@@ -195,7 +170,6 @@ export default function DashboardPage() {
           <select className="form-sel" value={mois} onChange={e=>setMois(e.target.value)}>
             {MOIS_LISTE.map(m=><option key={m.v} value={m.v}>{m.l}</option>)}
           </select>
-          <button className="btn" onClick={()=>setRefreshKey(k=>k+1)} title="Rafraîchir">🔄</button>
         </div>
         <div style={{display:'flex',alignItems:'center',gap:12,background:'rgba(34,211,238,.06)',border:'1px solid rgba(34,211,238,.2)',borderRadius:9,padding:'8px 16px',flexWrap:'wrap'}}>
           <div style={{display:'flex',flexDirection:'column',alignItems:'center'}}>
@@ -301,4 +275,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
