@@ -12,6 +12,7 @@ import RapportsPage from './components/rapports/RapportsPage';
 import ImportPage from './components/import/ImportPage';
 import ParametresPage from './components/parametres/ParametresPage';
 import UtilisateursPage from './components/utilisateurs/UtilisateursPage';
+import { RefreshProvider } from './context/RefreshContext';
 
 function Guard({ path, element }) {
   const { user, canAccess, loading, getRole } = useAuth();
@@ -65,6 +66,7 @@ function AppRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
+      <RefreshProvider>
       <AuthProvider>
         <Toaster position="top-right" toastOptions={{
           style:{background:'#0d1f3c',color:'#f1f5f9',border:'1px solid #1e3a5f',fontSize:12},
@@ -73,6 +75,7 @@ export default function App() {
         }}/>
         <AppRoutes/>
       </AuthProvider>
+    </RefreshProvider>
     </BrowserRouter>
   );
 }

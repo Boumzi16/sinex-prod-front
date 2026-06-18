@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useRefresh } from '../../context/RefreshContext';
 import { productionAPI } from '../../services/api';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
@@ -71,6 +72,7 @@ export default function ProductionPage() {
   const [form,    setForm]    = useState(VIDE);
   const [theo,    setTheo]    = useState({});
 
+  const { triggerRefresh } = useRefresh();
   const isDG = can('validerProd');
 
   const charger = async () => {
@@ -151,7 +153,7 @@ export default function ProductionPage() {
         await productionAPI.creer(payload);
         toast.success('Saisie enregistrée — en attente de validation DG');
       }
-      setModal(false); setForm(VIDE); setEditId(null); charger();
+      setModal(false); setForm(VIDE); setEditId(null); charger(); triggerRefresh();
     } catch(e) { toast.error(e.response?.data?.message||'Erreur'); }
   };
 
@@ -159,7 +161,7 @@ export default function ProductionPage() {
     try {
       await productionAPI.valider(id);
       toast.success('✓ Production validée — Stocks et ATP mis à jour');
-      charger();
+      charger(); triggerRefresh();
     } catch(e) { toast.error(e.response?.data?.message||'Erreur'); }
   };
 
@@ -202,7 +204,7 @@ export default function ProductionPage() {
       {can('saisirProd') && (
         <ImportDrop type="production" icon="🏭" color="cyan"
           label="Import Production Excel — PDT_MOIS_ANNEE_SINEX_SA.xlsx"
-          onSuccess={()=>charger()}/>
+          onSuccess={()=>{ charger(); triggerRefresh(); }}/>
       )}
 
       {/* Tableau saisies */}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useRefresh } from '../../context/RefreshContext';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import ImportDrop from '../import/ImportDrop';
@@ -25,6 +26,7 @@ const TH = ({children, right, cyan, red, green, w, style={}}) => (
 
 export default function StocksPage() {
   const { can } = useAuth();
+  const { lastRefresh } = useRefresh();
   const isDG = can('stocks') === 'write';
 
   const [onglet,    setOnglet]    = useState('stocks');
@@ -78,7 +80,7 @@ export default function StocksPage() {
   };
 
   // Chargement initial + rechargement sur changement de mois
-  useEffect(() => { chargerSoldes(moisF); }, [moisF]); // eslint-disable-line
+  useEffect(() => { chargerSoldes(moisF); }, [moisF, lastRefresh]); // eslint-disable-line
   useEffect(() => {
     if (onglet === 'mouvements') chargerResume(moisF, classeF);
   }, [onglet, moisF, classeF]); // eslint-disable-line

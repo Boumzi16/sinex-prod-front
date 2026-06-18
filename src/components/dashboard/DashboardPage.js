@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useRefresh } from '../../context/RefreshContext';
 import api from '../../services/api';
 import { dashboardAPI, stocksAPI, tresorerieAPI } from '../../services/api';
 import toast from 'react-hot-toast';
@@ -14,6 +15,7 @@ const MOIS_LISTE = [
 ];
 
 export default function DashboardPage() {
+  const { lastRefresh } = useRefresh();
   const [mois,   setMois]   = useState(new Date().toISOString().slice(0,7));
   const [kpis,   setKpis]   = useState({});
   const [stocks, setStocks] = useState([]);
@@ -21,10 +23,35 @@ export default function DashboardPage() {
   const [evo,    setEvo]    = useState([]);
   const [rebuts, setRebuts] = useState([]);
   const [loading,setLoading]= useState(true);
-  const [cpf, setCpf] = useState(null);
+  const [cpf,    setCpf]    = useState(null);
+  const [caCumule,setCaCumule] = useState(0);
 
   const refFmt=useRef(); const refEvo=useRef(); const refReb=useRef();
   const instFmt=useRef(); const instEvo=useRef(); const instReb=useRef();
+
+  // Clé de rafraîchissement — incrémentée depuis n'importe quelle page via sessionStorage
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Écouter les rafraîchissements déclenchés depuis d'autres pages
+  useEffect(() => {
+    const handleStorage = (e) => {
+      if (e.key === 'sinex_refresh') setRefreshKey(k => k+1);
+    };
+    window.addEventListener('storage', handleStorage);
+    // Aussi vérifier le flag au focus de la fenêtre
+    const handleFocus = () => {
+      const flag = sessionStorage.getItem('sinex_need_refresh');
+      if (flag) {
+        sessionStorage.removeItem('sinex_need_refresh');
+        setRefreshKey(k => k+1);
+      }
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, []);
 
   const charger = async () => {
     setLoading(true);
@@ -50,7 +77,7 @@ export default function DashboardPage() {
         setTreso(c);
       }
     } catch { toast.error('Erreur chargement'); }
-    // Calculer CPF annuel
+
     try {
       const annee = mois.slice(0,4);
       const moisIdx = parseInt(mois.slice(5,7));
@@ -69,17 +96,10 @@ export default function DashboardPage() {
     finally { setLoading(false); }
   };
 
-  useEffect(()=>{ charger(); },[mois]); // eslint-disable-line
+  // Recharger quand mois change OU quand refreshKey change
+  useEffect(() => { charger(); }, [mois, refreshKey]); // eslint-disable-line
 
-
-
-  // CA du mois calculé à partir des KPIs
-  const caMois = (parseFloat(kpis.c12||0)*PRIX.C12) + (parseFloat(kpis.c24||0)*PRIX.C24) +
-    (parseFloat(kpis.f615||0)*PRIX.F615) + (parseFloat(kpis.f605||0)*PRIX.F605) +
-    (parseFloat(kpis.f61||0)*PRIX.F61) + (parseFloat(kpis.hilio||0)*PRIX.HILIO);
-
-  // CA cumulé annuel = somme de tous les mois de l'année en cours depuis janvier
-  const [caCumule, setCaCumule] = useState(0);
+  // CA cumulé annuel
   useEffect(()=>{
     const annee = mois.slice(0,4);
     const moisCourant = parseInt(mois.slice(5,7));
@@ -96,7 +116,7 @@ export default function DashboardPage() {
       },0);
       setCaCumule(total);
     });
-  },[mois]); // eslint-disable-line
+  },[mois, refreshKey]); // eslint-disable-line
 
   useEffect(()=>{
     if(loading) return;
@@ -126,7 +146,6 @@ export default function DashboardPage() {
             y:{grid:{display:false},ticks:{color:'#94a3b8'}}}}
       });
 
-      // Évolution CA depuis janvier jusqu'au mois sélectionné
       const annee = mois.slice(0,4);
       const moisIdx = parseInt(mois.slice(5,7));
       const moisLabels = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'].slice(0,moisIdx);
@@ -165,25 +184,21 @@ export default function DashboardPage() {
 
   return (
     <div className="fade-up">
-      {/* Filtre mois + CA annuel */}
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14,flexWrap:'wrap',gap:10}}>
         <div style={{display:'flex',alignItems:'center',gap:8}}>
           <span style={{fontSize:11,color:'var(--text3)'}}>Mois :</span>
           <select className="form-sel" value={mois} onChange={e=>setMois(e.target.value)}>
             {MOIS_LISTE.map(m=><option key={m.v} value={m.v}>{m.l}</option>)}
           </select>
+          <button className="btn" onClick={()=>setRefreshKey(k=>k+1)} title="Rafraîchir">🔄</button>
         </div>
         <div style={{display:'flex',alignItems:'center',gap:12,background:'rgba(34,211,238,.06)',border:'1px solid rgba(34,211,238,.2)',borderRadius:9,padding:'8px 16px',flexWrap:'wrap'}}>
-          {(
-            <>
-              <div style={{display:'flex',flexDirection:'column',alignItems:'center'}}>
-                <span style={{fontSize:9,color:'var(--text3)',textTransform:'uppercase',letterSpacing:.5}}>CPF {mois.slice(0,4)}</span>
-                <span style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--purple)',fontSize:15}}>{cpf!==null?cpf.toFixed(2):'—'}</span>
-                <span style={{fontSize:9,color:'var(--text3)'}}>Perf. financière</span>
-              </div>
-              <span style={{color:'var(--border2)',fontSize:18}}>|</span>
-            </>
-          )}
+          <div style={{display:'flex',flexDirection:'column',alignItems:'center'}}>
+            <span style={{fontSize:9,color:'var(--text3)',textTransform:'uppercase',letterSpacing:.5}}>CPF {mois.slice(0,4)}</span>
+            <span style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--purple)',fontSize:15}}>{cpf!==null?cpf.toFixed(2):'—'}</span>
+            <span style={{fontSize:9,color:'var(--text3)'}}>Perf. financière</span>
+          </div>
+          <span style={{color:'var(--border2)',fontSize:18}}>|</span>
           <div style={{display:'flex',flexDirection:'column',alignItems:'center'}}>
             <span style={{fontSize:9,color:'var(--text3)',textTransform:'uppercase',letterSpacing:.5}}>CA HT mensuel</span>
             <span style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--cyan)',fontSize:15}}>{fmt(caMois)}</span>
@@ -198,7 +213,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 6 KPIs */}
       <div className="kpi-row">
         {[
           {cls:'cc',lbl:'Cartons C12',  val:fmt(kpis.c12||0),    sub:'cartons',  color:'var(--cyan)',  w:`${Math.min(100,parseFloat(kpis.c12||0)/100)}%`},
@@ -217,7 +231,6 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* 2 graphiques */}
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:12}}>
         <div className="card">
           <div className="card-hd"><div className="card-t">Production par format — {MOIS_LISTE.find(m=>m.v===mois)?.l}</div><span className="cbadge bc">Validé</span></div>
@@ -229,7 +242,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 3 cartes basses */}
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12}}>
         <div className="card">
           <div className="card-hd">
@@ -243,8 +255,7 @@ export default function DashboardPage() {
                 <tr key={i}>
                   <td>{s.libelle||s.nom}</td>
                   <td style={{fontFamily:'var(--mono)'}}>{fmt(s.stock_actuel||0)}</td>
-                  <td>{s.alerte_stock||s.statut==='out'?<span className="st sout">Rupture</span>
-                    :<span className="st slow">Faible</span>}</td>
+                  <td>{s.alerte_stock||s.statut==='out'?<span className="st sout">Rupture</span>:<span className="st slow">Faible</span>}</td>
                 </tr>
               ))}
               {!alertes.length&&<tr><td colSpan={3} style={{textAlign:'center',color:'var(--text3)',padding:16}}>
@@ -285,3 +296,9 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+// Variable caMois manquante — recalcul inline
+DashboardPage.caMois = (kpis) =>
+  (parseFloat(kpis.c12||0)*PRIX.C12) + (parseFloat(kpis.c24||0)*PRIX.C24) +
+  (parseFloat(kpis.f615||0)*PRIX.F615) + (parseFloat(kpis.f605||0)*PRIX.F605) +
+  (parseFloat(kpis.f61||0)*PRIX.F61) + (parseFloat(kpis.hilio||0)*PRIX.HILIO);
