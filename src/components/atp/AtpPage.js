@@ -37,13 +37,13 @@ export default function AtpPage() {
   const [stkVal,   setStkVal]   = useState(0);
   const [data,     setData]     = useState(null);
   const [loading,  setLoading]  = useState(false);
-  // Modals
+
   const [modalObj,  setModalObj]  = useState(false);
   const [modalCh,   setModalCh]   = useState(false);
   const [modalPrev, setModalPrev] = useState(false);
-  const [formObj,   setFormObj]   = useState({...VIDE_QTY});
+  const [formObj,   setFormObj]   = useState({...VIDE_QTY, cdhtp_manuel:0});
   const [formCh,    setFormCh]    = useState({...VIDE_CH});
-  const [formPrev,  setFormPrev]  = useState({...VIDE_QTY});
+  const [formPrev,  setFormPrev]  = useState({...VIDE_QTY, cdhtp_manuel:0});
 
   const charger = async () => {
     setLoading(true);
@@ -73,7 +73,6 @@ export default function AtpPage() {
   const moisSuiv = getMoisSuivant(mois);
   const moisSuivLabel = MOIS_LISTE.find(m=>m.v===moisSuiv)?.l || moisSuiv;
 
-  // Données depuis le backend
   const obj  = data?.objectifs    || VIDE_QTY;
   const real = data?.realisations  || VIDE_QTY;
   const prev = data?.previsions    || VIDE_QTY;
@@ -100,18 +99,28 @@ export default function AtpPage() {
   const bmfTxR = data?.bmfTxR || 0;
   const fsTxR  = data?.fsTxR  || 0;
   const ammTxR = data?.ammTxR || 0;
+  const totalCI = data?.totalCI || 0;
+  const tauxAv  = data?.taux_avancement || 0;
 
-  const totalCI  = data?.totalCI || 0;
-
-
-  const tauxAv   = data?.taux_avancement || 0;
-
-  // CA prévisions mois suivant (calculé localement)
   const CAPrev = PRODUITS.reduce((s,p)=>s+(parseFloat(prev[p.key]||0)*p.prix),0);
+
+  // CAHTP calculé dans le modal objectifs
+  const cahtp_modal = PRODUITS.reduce((s,p)=>s+(formObj[p.key]||0)*p.prix,0);
+  // MBHTP calculé dans le modal = CAHTP - CDHTP manuel
+  const mbhtp_modal = cahtp_modal - (formObj.cdhtp_manuel||0);
+  const tmbhtp_modal = cahtp_modal>0 ? mbhtp_modal/cahtp_modal : 0;
+
+  // CAHTP prévisions modal
+  const cahtp_prev = PRODUITS.reduce((s,p)=>s+(formPrev[p.key]||0)*p.prix,0);
+  const mbhtp_prev = cahtp_prev - (formPrev.cdhtp_manuel||0);
 
   const sauverObjectifs = async () => {
     try {
-      await api.post('/atp/objectifs', { mois, objectifs: formObj });
+      await api.post('/atp/objectifs', {
+        mois,
+        objectifs: formObj,
+        cdhtp_manuel: formObj.cdhtp_manuel||0,
+      });
       toast.success('Objectifs enregistrés ✓');
       setModalObj(false); charger();
     } catch { toast.error('Erreur enregistrement'); }
@@ -127,7 +136,11 @@ export default function AtpPage() {
 
   const sauverPrevisions = async () => {
     try {
-      await api.post('/atp/previsions', { mois, previsions: formPrev });
+      await api.post('/atp/previsions', {
+        mois,
+        previsions: formPrev,
+        cdhtp_manuel: formPrev.cdhtp_manuel||0,
+      });
       toast.success(`Prévisions enregistrées → Objectifs ${moisSuivLabel} ✓`);
       setModalPrev(false); charger();
     } catch { toast.error('Erreur enregistrement'); }
@@ -142,34 +155,32 @@ export default function AtpPage() {
         <select className="form-sel" value={mois} onChange={e=>setMois(e.target.value)}>
           {MOIS_LISTE.map(m=><option key={m.v} value={m.v}>{m.l}</option>)}
         </select>
-        <button className="btn primary" onClick={()=>{setFormObj({...obj,...VIDE_QTY,...obj});setModalObj(true);}}>
+        <button className="btn primary" onClick={()=>{setFormObj({...VIDE_QTY,...obj,cdhtp_manuel:data?.CDHTP||0});setModalObj(true);}}>
           📊 Saisir objectifs
         </button>
         <button className="btn amber" onClick={()=>{setFormCh({...VIDE_CH,...ch});setModalCh(true);}}>
           💼 Charges indirectes
         </button>
-        <button className="btn" style={{marginLeft:'auto'}} onClick={()=>{setFormPrev({...prev,...VIDE_QTY,...prev});setModalPrev(true);}}>
+        <button className="btn" style={{marginLeft:'auto'}} onClick={()=>{setFormPrev({...VIDE_QTY,...prev,cdhtp_manuel:data?.CDHTR||0});setModalPrev(true);}}>
           🔮 Prévisions {moisSuivLabel}
         </button>
       </div>
 
       {/* Trésorerie disponible */}
       <div className="card" style={{marginBottom:12,background:'linear-gradient(135deg,rgba(34,211,238,.08),rgba(52,211,153,.05))'}}>
-        <div className="card-hd"><div className="card-t">💰 Trésorerie disponible — Projet de production</div><span className="cbadge bc">FCFA</span></div>
+        <div className="card-hd"><div className="card-t">💰 Trésorerie disponible</div><span className="cbadge bc">FCFA</span></div>
         <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10}}>
           <div className="fin-card"><div className="fin-lbl">Trésorerie totale</div><div className="fin-val">{fmt(treso)}</div><div className="fin-sub">FCFA</div></div>
           <div className="fin-card"><div className="fin-lbl">Valeur stocks</div><div className="fin-val">{fmt(stkVal)}</div><div className="fin-sub">FCFA</div></div>
           <div className="fin-card" style={{borderColor:'rgba(34,211,238,.3)'}}><div className="fin-lbl">Total disponible</div><div className="fin-val" style={{color:'var(--cyan)'}}>{fmt(treso+stkVal)}</div><div className="fin-sub">Tréso + Stocks</div></div>
           <div className="fin-card"><div className="fin-lbl">CAHTP</div><div className="fin-val" style={{color:'var(--amber)'}}>{CAHTP>0?fmt(CAHTP):'—'}</div><div className="fin-sub">Prévisionnel</div></div>
-
         </div>
       </div>
 
       {/* Objectifs + Réalisations */}
       <div className="atp-grid">
-        {/* OBJECTIFS */}
         <div className="card">
-          <div className="card-hd"><div className="card-t">📊 Objectifs de production — Projection</div><span className="cbadge ba">Prévisionnel</span></div>
+          <div className="card-hd"><div className="card-t">📊 Objectifs — Projection</div><span className="cbadge ba">Prévisionnel</span></div>
           <table className="tbl">
             <thead><tr><th>Produit</th><th>Qté obj.</th><th>Prix unit. HT</th><th>Montant FCFA</th></tr></thead>
             <tbody>
@@ -182,14 +193,14 @@ export default function AtpPage() {
                 </tr>
               ))}
             </tbody>
-            <tfoot><tr style={{borderTop:'1px solid var(--border)'}}>
-              <td colSpan={3} style={{fontWeight:600,color:'var(--text1)',fontSize:10}}>CAHTP</td>
-              <td style={{fontWeight:700,color:'var(--cyan)',fontFamily:'var(--mono)'}}>{CAHTP>0?fmt(CAHTP):'—'}</td>
-            </tr></tfoot>
+            <tfoot>
+              <tr><td colSpan={3} style={{fontWeight:600,fontSize:10}}>CAHTP</td><td style={{fontWeight:700,color:'var(--cyan)',fontFamily:'var(--mono)'}}>{CAHTP>0?fmt(CAHTP):'—'}</td></tr>
+              <tr><td colSpan={3} style={{fontWeight:600,fontSize:10,color:'var(--red)'}}>CDHTP <span style={{fontSize:9,color:'var(--text3)'}}>(saisi manuellement)</span></td><td style={{fontWeight:700,color:'var(--red)',fontFamily:'var(--mono)'}}>{CDHTP>0?fmt(CDHTP):'—'}</td></tr>
+              <tr><td colSpan={3} style={{fontWeight:600,fontSize:10,color:'var(--cyan)'}}>MBHTP</td><td style={{fontWeight:700,color:'var(--cyan)',fontFamily:'var(--mono)'}}>{MBHTP!==0?fmt(MBHTP):'—'}</td></tr>
+            </tfoot>
           </table>
         </div>
 
-        {/* RÉALISATIONS */}
         <div className="card">
           <div className="card-hd"><div className="card-t">✅ Réalisation en cours</div><span className="cbadge bg">Cumulé automatique</span></div>
           <table className="tbl">
@@ -210,19 +221,19 @@ export default function AtpPage() {
                 );
               })}
             </tbody>
-            <tfoot><tr style={{borderTop:'1px solid var(--border)'}}>
-              <td colSpan={3} style={{fontWeight:600,color:'var(--text1)',fontSize:10}}>CAHTR</td>
-              <td style={{fontWeight:700,color:'var(--green)',fontFamily:'var(--mono)'}}>{CAHTR>0?fmt(CAHTR):'—'}</td>
-              <td style={{fontWeight:700,color:'var(--green)',fontFamily:'var(--mono)'}}>{CAHTP>0&&CAHTR>0?fmtP(tauxAv):'—'}</td>
-            </tr></tfoot>
+            <tfoot>
+              <tr><td colSpan={3} style={{fontWeight:600,fontSize:10}}>CAHTR</td><td style={{fontWeight:700,color:'var(--green)',fontFamily:'var(--mono)'}}>{CAHTR>0?fmt(CAHTR):'—'}</td><td style={{fontWeight:700,color:'var(--green)',fontFamily:'var(--mono)'}}>{CAHTP>0&&CAHTR>0?fmtP(tauxAv):'—'}</td></tr>
+              <tr><td colSpan={3} style={{fontWeight:600,fontSize:10,color:'var(--red)'}}>CDHTR <span style={{fontSize:9,color:'var(--text3)'}}>(saisi manuellement)</span></td><td style={{fontWeight:700,color:'var(--red)',fontFamily:'var(--mono)'}} colSpan={2}>{CDHTR>0?fmt(CDHTR):'—'}</td></tr>
+              <tr><td colSpan={3} style={{fontWeight:600,fontSize:10,color:'var(--green)'}}>MBHTR</td><td style={{fontWeight:700,color:'var(--green)',fontFamily:'var(--mono)'}} colSpan={2}>{MBHTR!==0?fmt(MBHTR):'—'}</td></tr>
+            </tfoot>
           </table>
         </div>
       </div>
 
-      {/* Charges indirectes résumé */}
+      {/* Charges indirectes */}
       {totalCI>0&&(
         <div className="card" style={{marginBottom:14}}>
-          <div className="card-hd"><div className="card-t">💼 Charges indirectes (CIHT) — {MOIS_LISTE.find(m=>m.v===mois)?.l}</div><span className="cbadge bp">Saisies manuellement</span></div>
+          <div className="card-hd"><div className="card-t">💼 Charges indirectes (CIHT)</div><span className="cbadge bp">Saisies manuellement</span></div>
           <div style={{display:'grid',gridTemplateColumns:'repeat(6,1fr)',gap:8}}>
             {[['salaires','Salaires'],['electricite','Électricité'],['carburant','Carburant'],['loyer','Loyer'],['maintenance','Maintenance'],['autres','Autres']].map(([k,l])=>(
               <div key={k} className="fin-card">
@@ -238,62 +249,50 @@ export default function AtpPage() {
         </div>
       )}
 
-      {/* Marges Projection + Réalisation */}
+      {/* Marges */}
       <div className="atp-grid" style={{marginBottom:14}}>
-        {/* MARGES PROJECTION */}
         <div className="card">
-          <div className="card-hd"><div className="card-t">📐 Marges brutes — Projection</div><span className="cbadge ba">Prévisionnel</span></div>
+          <div className="card-hd"><div className="card-t">📐 Marges — Projection</div><span className="cbadge ba">Prévisionnel</span></div>
           <table className="tbl">
             <thead><tr><th>#</th><th>Libellé</th><th>Montant FCFA</th></tr></thead>
             <tbody>
               <tr><td>1</td><td>CAHTP</td><td style={{fontFamily:'var(--mono)'}}>{CAHTP>0?fmt(CAHTP):'—'}</td></tr>
-              <tr><td>2</td><td>CDHTP</td><td style={{fontFamily:'var(--mono)',color:'var(--red)'}}>{CDHTP>0?fmt(CDHTP):'—'}</td></tr>
-              <tr><td>3</td><td style={{fontWeight:600,color:'var(--cyan)'}}>MBHTP</td><td style={{fontFamily:'var(--mono)',color:'var(--cyan)',fontWeight:700}}>{MBHTP>0?fmt(MBHTP):'—'}</td></tr>
-              <tr><td>4</td><td>TMBHTP</td><td style={{fontFamily:'var(--mono)',color:'var(--amber)',fontWeight:600}}>{TMBHTP>0?fmtP(TMBHTP):'—'}</td></tr>
+              <tr><td>2</td><td style={{color:'var(--red)'}}>CDHTP <span style={{fontSize:9,color:'var(--text3)'}}>(manuel)</span></td><td style={{fontFamily:'var(--mono)',color:'var(--red)'}}>{CDHTP>0?fmt(CDHTP):'—'}</td></tr>
+              <tr><td>3</td><td style={{fontWeight:600,color:'var(--cyan)'}}>MBHTP</td><td style={{fontFamily:'var(--mono)',color:'var(--cyan)',fontWeight:700}}>{MBHTP!==0?fmt(MBHTP):'—'}</td></tr>
+              <tr><td>4</td><td>TMBHTP</td><td style={{fontFamily:'var(--mono)',color:'var(--amber)',fontWeight:600}}>{TMBHTP!==0?fmtP(TMBHTP):'—'}</td></tr>
             </tbody>
           </table>
           <div style={{height:1,background:'var(--border)',margin:'10px 0'}}/>
-          <div className="sec-title">Répartition MBHTP prévisionnelle</div>
+          <div className="sec-title">Répartition MBHTP</div>
           <table className="tbl">
             <thead><tr><th>Rubrique</th><th>Montant</th><th>Taux</th></tr></thead>
             <tbody>
               <tr><td>BMF</td><td style={{fontFamily:'var(--mono)'}}>{bmfMtP>0?fmt(bmfMtP):'—'}</td><td style={{fontFamily:'var(--mono)',color:'var(--amber)'}}>{bmfTxP>0?fmtP(bmfTxP):'—'}</td></tr>
               <tr><td>Frais de siège</td><td style={{fontFamily:'var(--mono)'}}>{fsMtP>0?fmt(fsMtP):'—'}</td><td style={{fontFamily:'var(--mono)',color:'var(--amber)'}}>{fsTxP>0?fmtP(fsTxP):'—'}</td></tr>
               <tr><td>Amortissement</td><td style={{fontFamily:'var(--mono)'}}>{ammMtP>0?fmt(ammMtP):'—'}</td><td style={{fontFamily:'var(--mono)',color:'var(--amber)'}}>{ammTxP>0?fmtP(ammTxP):'—'}</td></tr>
-              <tr>
-                <td style={{fontWeight:600}}>TOTAL</td>
-                <td style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--cyan)'}}>{bmfMtP>0?fmt(bmfMtP+fsMtP+ammMtP):'—'}</td>
-                <td style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--cyan)'}}>{(bmfTxP+fsTxP+ammTxP)>0?fmtP(bmfTxP+fsTxP+ammTxP):'—'}</td>
-              </tr>
             </tbody>
           </table>
         </div>
 
-        {/* MARGES RÉALISATION */}
         <div className="card">
-          <div className="card-hd"><div className="card-t">📐 Marges brutes — Réalisation</div><span className="cbadge bg">Cumulé automatique</span></div>
+          <div className="card-hd"><div className="card-t">📐 Marges — Réalisation</div><span className="cbadge bg">Cumulé automatique</span></div>
           <table className="tbl">
             <thead><tr><th>#</th><th>Libellé</th><th>Montant FCFA</th></tr></thead>
             <tbody>
               <tr><td>5</td><td>CAHTR</td><td style={{fontFamily:'var(--mono)'}}>{CAHTR>0?fmt(CAHTR):'—'}</td></tr>
-              <tr><td>6</td><td>CDHTR</td><td style={{fontFamily:'var(--mono)',color:'var(--red)'}}>{CDHTR>0?fmt(CDHTR):'—'}</td></tr>
-              <tr><td>7</td><td style={{fontWeight:600,color:'var(--green)'}}>MBHTR</td><td style={{fontFamily:'var(--mono)',color:'var(--green)',fontWeight:700}}>{MBHTR>0?fmt(MBHTR):'—'}</td></tr>
-              <tr><td>8</td><td>TMBHTR</td><td style={{fontFamily:'var(--mono)',color:'var(--amber)',fontWeight:600}}>{TMBHTR>0?fmtP(TMBHTR):'—'}</td></tr>
+              <tr><td>6</td><td style={{color:'var(--red)'}}>CDHTR <span style={{fontSize:9,color:'var(--text3)'}}>(manuel)</span></td><td style={{fontFamily:'var(--mono)',color:'var(--red)'}}>{CDHTR>0?fmt(CDHTR):'—'}</td></tr>
+              <tr><td>7</td><td style={{fontWeight:600,color:'var(--green)'}}>MBHTR</td><td style={{fontFamily:'var(--mono)',color:'var(--green)',fontWeight:700}}>{MBHTR!==0?fmt(MBHTR):'—'}</td></tr>
+              <tr><td>8</td><td>TMBHTR</td><td style={{fontFamily:'var(--mono)',color:'var(--amber)',fontWeight:600}}>{TMBHTR!==0?fmtP(TMBHTR):'—'}</td></tr>
             </tbody>
           </table>
           <div style={{height:1,background:'var(--border)',margin:'10px 0'}}/>
-          <div className="sec-title">Répartition MBHTR réalisée</div>
+          <div className="sec-title">Répartition MBHTR</div>
           <table className="tbl">
             <thead><tr><th>Rubrique</th><th>Montant</th><th>Taux</th></tr></thead>
             <tbody>
               <tr><td>BMF</td><td style={{fontFamily:'var(--mono)'}}>{bmfMtR>0?fmt(bmfMtR):'—'}</td><td style={{fontFamily:'var(--mono)',color:'var(--green)'}}>{bmfTxR>0?fmtP(bmfTxR):'—'}</td></tr>
               <tr><td>Frais de siège</td><td style={{fontFamily:'var(--mono)'}}>{fsMtR>0?fmt(fsMtR):'—'}</td><td style={{fontFamily:'var(--mono)',color:'var(--green)'}}>{fsTxR>0?fmtP(fsTxR):'—'}</td></tr>
               <tr><td>Amortissement</td><td style={{fontFamily:'var(--mono)'}}>{ammMtR>0?fmt(ammMtR):'—'}</td><td style={{fontFamily:'var(--mono)',color:'var(--green)'}}>{ammTxR>0?fmtP(ammTxR):'—'}</td></tr>
-              <tr>
-                <td style={{fontWeight:600}}>TOTAL</td>
-                <td style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--green)'}}>{bmfMtR>0?fmt(bmfMtR+fsMtR+ammMtR):'—'}</td>
-                <td style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--green)'}}>{(bmfTxR+fsTxR+ammTxR)>0?fmtP(bmfTxR+fsTxR+ammTxR):'—'}</td>
-              </tr>
             </tbody>
           </table>
         </div>
@@ -305,44 +304,36 @@ export default function AtpPage() {
           <div className="card-t">🔮 Prévisions — {moisSuivLabel}</div>
           <span className="cbadge bp">→ Objectifs {moisSuivLabel}</span>
         </div>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
-          <table className="tbl">
-            <thead><tr><th>Produit</th><th>Qté prévisionnelle</th><th>CA HT estimé</th></tr></thead>
-            <tbody>
-              {PRODUITS.map(p=>(
-                <tr key={p.key}>
-                  <td>{p.nom}</td>
-                  <td style={{fontFamily:'var(--mono)'}}>{parseFloat(prev[p.key]||0)>0?fmt(prev[p.key]):'—'}</td>
-                  <td style={{fontFamily:'var(--mono)',color:'var(--purple)'}}>{parseFloat(prev[p.key]||0)>0?fmt(prev[p.key]*p.prix):'—'}</td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot><tr>
-              <td colSpan={2} style={{fontWeight:600,fontSize:10}}>CAHTP estimé ({moisSuivLabel})</td>
-              <td style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--purple)'}}>{CAPrev>0?fmt(CAPrev):'—'}</td>
-            </tr></tfoot>
-          </table>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,alignContent:'start'}}>
-            <div className="fin-card"><div className="fin-lbl">CAHTP estimé</div><div className="fin-val" style={{color:'var(--purple)'}}>{CAPrev>0?fmt(CAPrev):'—'}</div></div>
-            <div className="fin-card"><div className="fin-lbl">CDHTP estimé</div><div className="fin-val" style={{color:'var(--red)'}}>{CAPrev>0?fmt(PRODUITS.reduce((s,p)=>s+(parseFloat(prev[p.key]||0)*({C12:1037,C24:1136,F615:450.79,F605:282.79,F61:438.79,HILIO:75.23}[p.key]||0)),0)):'—'}</div></div>
-            <div className="fin-card"><div className="fin-lbl">MBHTP estimée</div><div className="fin-val" style={{color:'var(--green)'}}>{CAPrev>0?fmt(CAPrev-PRODUITS.reduce((s,p)=>s+(parseFloat(prev[p.key]||0)*({C12:1037,C24:1136,F615:450.79,F605:282.79,F61:438.79,HILIO:75.23}[p.key]||0)),0)):'—'}</div></div>
-            <div className="fin-card"><div className="fin-lbl">TMBHTP estimé</div><div className="fin-val" style={{color:'var(--amber)'}}>{CAPrev>0?fmtP((CAPrev-PRODUITS.reduce((s,p)=>s+(parseFloat(prev[p.key]||0)*({C12:1037,C24:1136,F615:450.79,F605:282.79,F61:438.79,HILIO:75.23}[p.key]||0)),0))/CAPrev):'—'}</div></div>
-          </div>
-        </div>
+        <table className="tbl">
+          <thead><tr><th>Produit</th><th>Qté prévisionnelle</th><th>CA HT estimé</th></tr></thead>
+          <tbody>
+            {PRODUITS.map(p=>(
+              <tr key={p.key}>
+                <td>{p.nom}</td>
+                <td style={{fontFamily:'var(--mono)'}}>{parseFloat(prev[p.key]||0)>0?fmt(prev[p.key]):'—'}</td>
+                <td style={{fontFamily:'var(--mono)',color:'var(--purple)'}}>{parseFloat(prev[p.key]||0)>0?fmt(prev[p.key]*p.prix):'—'}</td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot><tr>
+            <td colSpan={2} style={{fontWeight:600,fontSize:10}}>CAHTP estimé ({moisSuivLabel})</td>
+            <td style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--purple)'}}>{CAPrev>0?fmt(CAPrev):'—'}</td>
+          </tr></tfoot>
+        </table>
       </div>
 
       {/* ── MODAL OBJECTIFS ── */}
       {modalObj&&(
         <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&setModalObj(false)}>
-          <div className="modal" style={{width:580}}>
+          <div className="modal" style={{width:600}}>
             <div className="modal-title">
               📊 Objectifs — {MOIS_LISTE.find(m=>m.v===mois)?.l}
               <button className="modal-close" onClick={()=>setModalObj(false)}>✕</button>
             </div>
-            <div style={{background:'rgba(251,191,36,.06)',border:'1px solid rgba(251,191,36,.2)',borderRadius:8,padding:'8px 12px',marginBottom:14,fontSize:11,color:'var(--amber)'}}>
-              Saisissez les quantités prévisionnelles. CAHTP et CDHTP seront calculés automatiquement.
+            <div style={{background:'rgba(251,191,36,.06)',border:'1px solid rgba(251,191,36,.2)',borderRadius:8,padding:'8px 12px',marginBottom:12,fontSize:11,color:'var(--amber)'}}>
+              Saisissez les quantités prévisionnelles et le CDHTP réel.
             </div>
-            <table className="tbl" style={{marginBottom:14}}>
+            <table className="tbl" style={{marginBottom:12}}>
               <thead><tr><th>Produit</th><th>Prix vente HT</th><th>Qté objectif</th><th>CAHTP partiel</th></tr></thead>
               <tbody>
                 {PRODUITS.map(p=>(
@@ -358,13 +349,29 @@ export default function AtpPage() {
                   </tr>
                 ))}
               </tbody>
-              <tfoot><tr>
-                <td colSpan={3} style={{fontWeight:600}}>CAHTP Total</td>
-                <td style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--cyan)'}}>
-                  {fmt(PRODUITS.reduce((s,p)=>s+(formObj[p.key]||0)*p.prix,0))}
-                </td>
-              </tr></tfoot>
+              <tfoot>
+                <tr><td colSpan={3} style={{fontWeight:600}}>CAHTP Total</td>
+                  <td style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--cyan)'}}>{fmt(cahtp_modal)}</td></tr>
+              </tfoot>
             </table>
+
+            {/* CDHTP manuel */}
+            <div style={{background:'rgba(248,113,113,.06)',border:'1px solid rgba(248,113,113,.2)',borderRadius:8,padding:'12px',marginBottom:12}}>
+              <div style={{fontSize:11,fontWeight:600,color:'var(--red)',marginBottom:8}}>
+                CDHTP — Coût direct HT prévisionnel <span style={{fontWeight:400,color:'var(--text3)'}}>(à saisir manuellement)</span>
+              </div>
+              <div style={{display:'flex',alignItems:'center',gap:12}}>
+                <input type="number" className="form-inp" min={0} style={{flex:1,fontFamily:'var(--mono)',fontSize:14,color:'var(--red)',fontWeight:700}}
+                  value={formObj.cdhtp_manuel||0}
+                  onChange={e=>setFormObj(f=>({...f,cdhtp_manuel:+e.target.value}))}/>
+                <div style={{fontSize:11,color:'var(--text3)'}}>FCFA</div>
+              </div>
+              <div style={{display:'flex',gap:16,marginTop:10,fontSize:11}}>
+                <div>MBHTP = <strong style={{color:mbhtp_modal>=0?'var(--green)':'var(--red)',fontFamily:'var(--mono)'}}>{fmt(mbhtp_modal)}</strong> FCFA</div>
+                <div>TMBHTP = <strong style={{color:'var(--amber)',fontFamily:'var(--mono)'}}>{cahtp_modal>0?fmtP(mbhtp_modal/cahtp_modal):'—'}</strong></div>
+              </div>
+            </div>
+
             <div style={{display:'flex',justifyContent:'flex-end',gap:8}}>
               <button className="btn" onClick={()=>setModalObj(false)}>Annuler</button>
               <button className="btn primary" onClick={sauverObjectifs}>✓ Enregistrer les objectifs</button>
@@ -408,15 +415,15 @@ export default function AtpPage() {
       {/* ── MODAL PRÉVISIONS ── */}
       {modalPrev&&(
         <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&setModalPrev(false)}>
-          <div className="modal" style={{width:580}}>
+          <div className="modal" style={{width:600}}>
             <div className="modal-title">
               🔮 Prévisions → Objectifs {moisSuivLabel}
               <button className="modal-close" onClick={()=>setModalPrev(false)}>✕</button>
             </div>
-            <div style={{background:'rgba(167,139,250,.06)',border:'1px solid rgba(167,139,250,.2)',borderRadius:8,padding:'8px 12px',marginBottom:14,fontSize:11,color:'var(--purple)'}}>
+            <div style={{background:'rgba(167,139,250,.06)',border:'1px solid rgba(167,139,250,.2)',borderRadius:8,padding:'8px 12px',marginBottom:12,fontSize:11,color:'var(--purple)'}}>
               Ces prévisions deviendront automatiquement les objectifs de {moisSuivLabel}.
             </div>
-            <table className="tbl" style={{marginBottom:14}}>
+            <table className="tbl" style={{marginBottom:12}}>
               <thead><tr><th>Produit</th><th>Prix vente HT</th><th>Qté prévisionnelle</th><th>CAHTP estimé</th></tr></thead>
               <tbody>
                 {PRODUITS.map(p=>(
@@ -434,11 +441,27 @@ export default function AtpPage() {
               </tbody>
               <tfoot><tr>
                 <td colSpan={3} style={{fontWeight:600}}>CAHTP estimé {moisSuivLabel}</td>
-                <td style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--purple)'}}>
-                  {fmt(PRODUITS.reduce((s,p)=>s+(formPrev[p.key]||0)*p.prix,0))}
-                </td>
+                <td style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--purple)'}}>{fmt(cahtp_prev)}</td>
               </tr></tfoot>
             </table>
+
+            {/* CDHTP manuel pour prévisions */}
+            <div style={{background:'rgba(248,113,113,.06)',border:'1px solid rgba(248,113,113,.2)',borderRadius:8,padding:'12px',marginBottom:12}}>
+              <div style={{fontSize:11,fontWeight:600,color:'var(--red)',marginBottom:8}}>
+                CDHTP prévisionnel {moisSuivLabel} <span style={{fontWeight:400,color:'var(--text3)'}}>(à saisir manuellement)</span>
+              </div>
+              <div style={{display:'flex',alignItems:'center',gap:12}}>
+                <input type="number" className="form-inp" min={0} style={{flex:1,fontFamily:'var(--mono)',fontSize:14,color:'var(--red)',fontWeight:700}}
+                  value={formPrev.cdhtp_manuel||0}
+                  onChange={e=>setFormPrev(f=>({...f,cdhtp_manuel:+e.target.value}))}/>
+                <div style={{fontSize:11,color:'var(--text3)'}}>FCFA</div>
+              </div>
+              <div style={{display:'flex',gap:16,marginTop:10,fontSize:11}}>
+                <div>MBHTP = <strong style={{color:mbhtp_prev>=0?'var(--green)':'var(--red)',fontFamily:'var(--mono)'}}>{fmt(mbhtp_prev)}</strong> FCFA</div>
+                <div>TMBHTP = <strong style={{color:'var(--amber)',fontFamily:'var(--mono)'}}>{cahtp_prev>0?fmtP(mbhtp_prev/cahtp_prev):'—'}</strong></div>
+              </div>
+            </div>
+
             <div style={{display:'flex',justifyContent:'flex-end',gap:8}}>
               <button className="btn" onClick={()=>setModalPrev(false)}>Annuler</button>
               <button className="btn primary" onClick={sauverPrevisions}>✓ Enregistrer les prévisions</button>
