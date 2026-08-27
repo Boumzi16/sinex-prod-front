@@ -41,9 +41,11 @@ export default function AtpPage() {
   const [modalObj,  setModalObj]  = useState(false);
   const [modalCh,   setModalCh]   = useState(false);
   const [modalPrev, setModalPrev] = useState(false);
+  const [modalCDHTR,setModalCDHTR]= useState(false);
   const [formObj,   setFormObj]   = useState({...VIDE_QTY, cdhtp_manuel:0});
   const [formCh,    setFormCh]    = useState({...VIDE_CH});
   const [formPrev,  setFormPrev]  = useState({...VIDE_QTY, cdhtp_manuel:0});
+  const [formCDHTR, setFormCDHTR] = useState(0);
 
   const charger = async () => {
     setLoading(true);
@@ -114,6 +116,14 @@ export default function AtpPage() {
   const cahtp_prev = PRODUITS.reduce((s,p)=>s+(formPrev[p.key]||0)*p.prix,0);
   const mbhtp_prev = cahtp_prev - (formPrev.cdhtp_manuel||0);
 
+  const sauverCDHTR = async () => {
+    try {
+      await api.post('/atp/cdhtr', { mois, cdhtr: formCDHTR });
+      toast.success('CDHTR enregistré ✓');
+      setModalCDHTR(false); charger();
+    } catch { toast.error('Erreur enregistrement CDHTR'); }
+  };
+
   const sauverObjectifs = async () => {
     try {
       await api.post('/atp/objectifs', {
@@ -160,6 +170,9 @@ export default function AtpPage() {
         </button>
         <button className="btn amber" onClick={()=>{setFormCh({...VIDE_CH,...ch});setModalCh(true);}}>
           💼 Charges indirectes
+        </button>
+        <button className="btn danger" onClick={()=>{setFormCDHTR(data?.CDHTR||0);setModalCDHTR(true);}}>
+          💸 Saisir CDHTR
         </button>
         <button className="btn" style={{marginLeft:'auto'}} onClick={()=>{setFormPrev({...VIDE_QTY,...prev,cdhtp_manuel:data?.CDHTR||0});setModalPrev(true);}}>
           🔮 Prévisions {moisSuivLabel}
@@ -321,6 +334,50 @@ export default function AtpPage() {
           </tr></tfoot>
         </table>
       </div>
+
+      {/* ── MODAL CDHTR ── */}
+      {modalCDHTR&&(
+        <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&setModalCDHTR(false)}>
+          <div className="modal" style={{width:420}}>
+            <div className="modal-title" style={{color:'var(--red)'}}>
+              💸 CDHTR — {MOIS_LISTE.find(m=>m.v===mois)?.l}
+              <button className="modal-close" onClick={()=>setModalCDHTR(false)}>✕</button>
+            </div>
+            <div style={{background:'rgba(248,113,113,.06)',border:'1px solid rgba(248,113,113,.2)',borderRadius:8,padding:'10px 12px',marginBottom:14,fontSize:11,color:'var(--red)'}}>
+              Saisissez le coût direct réel HT (CDHTR) du mois. MBHTR = CAHTR - CDHTR.
+            </div>
+            <div className="form-grp" style={{marginBottom:12}}>
+              <label className="form-lbl" style={{color:'var(--red)'}}>CDHTR — Coût direct HT réalisé (FCFA)</label>
+              <input type="number" className="form-inp" min={0}
+                style={{fontFamily:'var(--mono)',fontSize:16,color:'var(--red)',fontWeight:700}}
+                value={formCDHTR}
+                onChange={e=>setFormCDHTR(+e.target.value)}/>
+            </div>
+            <div style={{background:'var(--bg3)',borderRadius:8,padding:'10px 12px',marginBottom:14,fontSize:12}}>
+              <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+                <span>CAHTR (automatique)</span>
+                <strong style={{fontFamily:'var(--mono)',color:'var(--green)'}}>{fmt(CAHTR)}</strong>
+              </div>
+              <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+                <span>CDHTR (saisi)</span>
+                <strong style={{fontFamily:'var(--mono)',color:'var(--red)'}}>{fmt(formCDHTR)}</strong>
+              </div>
+              <div style={{display:'flex',justifyContent:'space-between',borderTop:'1px solid var(--border)',paddingTop:6}}>
+                <span style={{fontWeight:700}}>MBHTR</span>
+                <strong style={{fontFamily:'var(--mono)',color:CAHTR-formCDHTR>=0?'var(--cyan)':'var(--red)',fontSize:14}}>{fmt(CAHTR-formCDHTR)}</strong>
+              </div>
+              <div style={{display:'flex',justifyContent:'space-between',marginTop:4}}>
+                <span>TMBHTR</span>
+                <strong style={{fontFamily:'var(--mono)',color:'var(--amber)'}}>{CAHTR>0?fmtP((CAHTR-formCDHTR)/CAHTR):'—'}</strong>
+              </div>
+            </div>
+            <div style={{display:'flex',justifyContent:'flex-end',gap:8}}>
+              <button className="btn" onClick={()=>setModalCDHTR(false)}>Annuler</button>
+              <button className="btn danger" onClick={sauverCDHTR}>✓ Enregistrer le CDHTR</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── MODAL OBJECTIFS ── */}
       {modalObj&&(
