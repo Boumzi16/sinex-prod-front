@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { tresorerieAPI, stocksAPI } from '../../services/api';
+import { useRefresh } from '../../context/RefreshContext';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -32,7 +33,9 @@ const VIDE_QTY = {C24:0,C12:0,F605:0,F615:0,F61:0,HILIO:0};
 const VIDE_CH  = {salaires:0,electricite:0,carburant:0,loyer:0,maintenance:0,autres:0};
 
 export default function AtpPage() {
-  const [mois,     setMois]     = useState(new Date().toISOString().slice(0,7));
+  const { moisGlobal, changerMois } = useRefresh();
+  const mois = moisGlobal;
+  const setMois = changerMois;
   const [treso,    setTreso]    = useState(0);
   const [stkVal,   setStkVal]   = useState(0);
   const [data,     setData]     = useState(null);

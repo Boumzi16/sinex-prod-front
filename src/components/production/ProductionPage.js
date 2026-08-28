@@ -65,7 +65,9 @@ function calcTheo(form) {
 export default function ProductionPage() {
   const {can} = useAuth();
   const [saisies, setSaisies] = useState([]);
-  const [mois,    setMois]    = useState(new Date().toISOString().slice(0,7));
+  const { moisGlobal, changerMois } = useRefresh();
+  const mois = moisGlobal;
+  const setMois = changerMois;
   const [loading, setLoading] = useState(true);
   const [modal,   setModal]   = useState(false);
   const [editId,  setEditId]  = useState(null);

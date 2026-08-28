@@ -26,7 +26,7 @@ const TH = ({children, right, cyan, red, green, w, style={}}) => (
 
 export default function StocksPage() {
   const { can } = useAuth();
-  const { lastRefresh } = useRefresh();
+  const { lastRefresh, moisGlobal, changerMois } = useRefresh();
   const isDG = can('stocks') === 'write';
 
   const [onglet,    setOnglet]    = useState('stocks');

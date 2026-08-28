@@ -42,7 +42,8 @@ export default function TresoreriePage() {
   const [mvts,        setMvts]        = useState([]);
   const [flux,        setFlux]        = useState([]);
   const [tabActif,    setTabActif]    = useState('all');
-  const [moisF,       setMoisF]       = useState('all');
+  const { moisGlobal, changerMois } = useRefresh();
+  const [moisF,       setMoisF]       = useState(moisGlobal !== 'all' ? moisGlobal : 'all');
   const [typeFilter,  setTypeFilter]  = useState('all');
   const [anneeF,      setAnneeF]      = useState('all');
   const [modal,       setModal]       = useState(false);
